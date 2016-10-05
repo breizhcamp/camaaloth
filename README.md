@@ -1,9 +1,3 @@
-# billetterie
+# Camaaloth, la malette vidéo du BreizhCamp
 
-Ce soft permet de gérer la billetterie de la conférence
-
-* prise de commande
-* paiement 
-* renseignement des participants
-* génération des badges
-* suivi des entrées
+Pour le BreizhCamp nous cherchions une solution de captation qui fonctionne en plug'n play et qui dépote du pâté, après avoir essayé diverses solutions nous avons choisi de la développer nous même ...
