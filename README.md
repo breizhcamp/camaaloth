@@ -11,8 +11,8 @@ Pour le BreizhCamp nous cherchions une solution de captation qui fonctionne en p
 - [X] pass-through de l'affichage speaker vers le système de projection, équipé soit en HDMi soit en VGA
 - [X] capture de la délicieuse plastique du speaker en pleine action
 - [X] composition en direct des flux audio et vidéo pour produire la vidéo diffusable
-- [ ] le tout dans une boite solide type flight-case, pratique à transporter, sans complexité de mise en oeuvre
-- [ ] éprouvé après des mois d'utilisation sur les divers événements des communautés BreizhCamp (TM)
+- [X] le tout dans une boite solide type flight-case, pratique à transporter, sans complexité de mise en oeuvre
+- [X] éprouvé après des mois d'utilisation sur les divers événements des communautés BreizhCamp (TM)
 
 
 ## Matos
