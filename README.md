@@ -34,3 +34,15 @@ Micro raccordé à l'entrée son du PC via une table de mixage (qui permettra à
 et voilà [le résultat](https://youtu.be/TmFP9R4AD-c)
 
 Sur cette première expérimentation le résultat est super encourageant, mais le setup reste plutôt fastidieux. La mise en flight-case est donc une étape à considérer rapidement :P
+
+### BreizhCamp 2017
+Après plusieurs mois de mise au point et de galères diverses entre les équipements désuets des salles de conférence (connectique VGA 1024x768) ou les PC speakers exotiques (MacBook dernière génération USB-C only, PC Windows 10 4k ...) nous avons pas mal éprouvé le bébé et étions fin prêts pour le BreizhCamp. Résultat : 30 session capturées sans soucis avec une super qualité !
+
+Par rapport au proto
+
+- troisième carte BlackMagic permettant de changer d'angle de caméra
+- micro serre tête sennheiser. Coute le deuxième bras, mais qu'est ce que le son est bon !
+- compresseur / gate audio. Permet d'avoir un niveau audio constant et d'éviter le bruit de fond résiduel pendant les "blancs"
+- diverses mises à jour système
+- le tout dans un rack tout intégré avec écran de contrôle, lourd comme une vache mais drôlement pratique quand même.
+
