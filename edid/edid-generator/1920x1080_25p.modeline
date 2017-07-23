@@ -1,4 +1,0 @@
-# 1920x1080 @ 25.00 Hz (CVT)
-#   field rate 24.93 Hz; hsync: 27.40 kHz; pclk: 65.75 MHz
-Modeline "1920x1080_25.00"  65.75  1920 1968 2160 2400  1080 1083 1088 1099  -HSync +Vsync
-
