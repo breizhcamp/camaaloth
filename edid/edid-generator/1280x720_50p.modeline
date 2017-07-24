@@ -1,2 +1,0 @@
-# https://github.com/torvalds/linux/blob/deac8429d62ca19c1571853e2a18f60e760ee04c/drivers/gpu/drm/drm_edid.c#L761
-ModeLine "1280x720" 74.25 1280 1720 1760 1980 720 725 730 750 +HSync +VSync
