@@ -1,3 +1,7 @@
+--
+-- In order to respond to OSC message, you must install lua-socket
+--
+
 -- The theme is what decides what's actually shown on screen, what kind of
 -- transitions are available (if any), and what kind of inputs there are,
 -- if any. In general, it drives the entire display logic by creating Movit
@@ -38,6 +42,11 @@ local FADE_TRANSITION = 2
 local last_resolution = {}
 
 require('utils')
+
+local socket = require("socket")
+udp = assert(socket.udp())
+assert(udp:setsockname("127.0.0.1", 21547))
+assert(udp:settimeout(0))
 
 
 -- Make all possible combinations of side-by-side chains.
@@ -339,6 +348,23 @@ function get_sbs_chain(signals, t, width, height, input_resolution)
 	return sbs_chains[input0_type][input1_type][true]
 end
 
+function read_osc_msg()
+	local dgram, ip, port = udp:receivefrom()
+	if not dgram then
+		return
+	end
+	print("Received '" .. dgram .. "' from " .. ip .. ":" .. port)
+
+	local address, value = parse_osc_msg(dgram)
+	print("Received OSC address [" .. address .. "] with type [" .. oscType .. "] and value [" .. value .. "]")
+
+	if (address == "/preview") then
+		channel_clicked(value)
+	elseif (address == "/transition") then
+		transition_clicked(value, t)
+	end
+end
+
 -- API ENTRY POINT
 -- Called every frame. Get the chain for displaying at input <num>,
 -- where 0 is live, 1 is preview, 2 is the first channel to display
@@ -364,6 +390,8 @@ end
 -- NOTE: The chain returned must be finalized with the Y'CbCr flag
 -- if and only if num==0.
 function get_chain(num, t, width, height, signals)
+	read_osc_msg()
+
 	local input_resolution = {}
 	for signal_num=0,1 do
 		local res = {
