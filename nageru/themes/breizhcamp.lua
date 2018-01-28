@@ -497,8 +497,8 @@ function prepare_sbs_chain(chain, t, transition_type, src_signal, dst_signal, sc
 
 	-- First input is positioned (16,48) from top-left.
 	-- Second input is positioned (16,48) from the bottom-right.
-	local pos0 = pos_from_top_left(16, 48, 848, 477, screen_width, screen_height)
-	local pos1 = pos_from_top_left(1280 - 384 - 16, 720 - 216 - 48, 384, 216, screen_width, screen_height)
+	local pos0 = pos_from_top_left(286, 720 - 651, 973, 547, screen_width, screen_height)
+	local pos1 = pos_from_top_left(20, 720 - 651, 247, 413, screen_width, screen_height)
 
 	local pos_fs = { x0 = 0, y0 = 0, x1 = screen_width, y1 = screen_height }
 	local affine_param

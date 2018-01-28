@@ -48,10 +48,11 @@ function make_sbs_chain(input0_signal, input0_type, input1_signal, input1_type, 
 	local input0 = make_sbs_input(chain, input0_signal, input0_type == "livedeint", hq)
 	local input1 = make_sbs_input(chain, input1_signal, input1_type == "livedeint", hq)
 
-	input0.padding_effect:set_vec4("border_color", 0.0, 0.0, 0.0, 1.0)
-	input1.padding_effect:set_vec4("border_color", 0.0, 0.0, 0.0, 0.0)
+	local sbs = chain:add_effect(OverlayEffect.new(), input0.padding_effect, input1.padding_effect)
 
-	chain:add_effect(OverlayEffect.new(), input0.padding_effect, input1.padding_effect)
+	local background = chain:add_effect(ImageInput.new("./placeholder.png"))
+	chain:add_effect(OverlayEffect.new(), background, sbs)
+
 	chain:finalize(hq)
 
 	return {
