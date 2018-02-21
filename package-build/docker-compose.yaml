@@ -1,0 +1,10 @@
+version: '2.1'
+services:
+  builder:
+    build:
+      context: ./builder-artful
+    volumes:
+      - ./packages:/packages
+      - ./target:/target
+    command: ["gbp", "buildpackage", "-uc", "-us", "--git-export-dir=/target/"]
+    working_dir: /packages/${PACKAGE_NAME}
