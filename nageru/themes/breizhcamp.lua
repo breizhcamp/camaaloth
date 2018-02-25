@@ -19,17 +19,21 @@ local transition_dst_signal = 0
 
 local neutral_colors = {
 	{0.5, 0.5, 0.5},  -- Input 0.
-	{0.5, 0.5, 0.5}   -- Input 1.
+	{0.5, 0.5, 0.5},  -- Input 1.
+	{0.5, 0.5, 0.5},  -- Input 2.
+	{0.5, 0.5, 0.5}   -- Input 3.	
 }
 
 local live_signal_num = 0
 local preview_signal_num = 1
+local NUM_CAMERAS = 3  -- Remember to update neutral_colors, too.
 
 -- Valid values for live_signal_num and preview_signal_num.
 local INPUT0_SIGNAL_NUM = 0
 local INPUT1_SIGNAL_NUM = 1
-local SBS_SIGNAL_NUM = 2
-local STATIC_SIGNAL_NUM = 3
+local INPUT2_SIGNAL_NUM = 2
+local SBS_SIGNAL_NUM = 3
+local STATIC_SIGNAL_NUM = 4
 
 -- Valid values for transition_type. (Cuts are done directly, so they need no entry.)
 local NO_TRANSITION = 0
@@ -105,7 +109,7 @@ function get_input_type(signals, signal_num)
 end
 
 function is_plain_signal(num)
-	return num == INPUT0_SIGNAL_NUM or num == INPUT1_SIGNAL_NUM
+	return num == INPUT0_SIGNAL_NUM or num == INPUT1_SIGNAL_NUM or num == INPUT2_SIGNAL_NUM or num == INPUT3_SIGNAL_NUM
 end
 
 function needs_scale(signals, signal_num, width, height)
@@ -121,7 +125,7 @@ end
 -- Returns the number of outputs in addition to the live (0) and preview (1).
 -- Called only once, at the start of the program.
 function num_channels()
-	return 4
+	return NUM_CAMERAS + 2  -- static picture and sbs
 end
 
 -- API ENTRY POINT
@@ -130,8 +134,12 @@ end
 -- channels in case they change resolution.
 function channel_name(channel)
 	local signal_num = channel - 2
-	if is_plain_signal(signal_num) then
-		return "Input " .. (signal_num + 1) .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
+	if signal_num == INPUT0_SIGNAL_NUM then
+		return "PC " .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
+	elseif signal_num == INPUT1_SIGNAL_NUM then
+		return "Camera 1 " .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
+	elseif signal_num == INPUT2_SIGNAL_NUM then
+		return "Camera 2" .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
 	elseif signal_num == SBS_SIGNAL_NUM then
 		return "Side-by-side"
 	elseif signal_num == STATIC_SIGNAL_NUM then
@@ -240,9 +248,9 @@ function get_transitions(t)
 	end
 
 	-- Various zooms.
-	if live_signal_num == SBS_SIGNAL_NUM and is_plain_signal(preview_signal_num) then
+	if live_signal_num == SBS_SIGNAL_NUM and (preview_signal_num == INPUT0_SIGNAL_NUM or preview_signal_num == INPUT1_SIGNAL_NUM) then
 		return {"Cut", "Zoom in"}
-	elseif is_plain_signal(live_signal_num) and preview_signal_num == SBS_SIGNAL_NUM then
+	elseif (live_signal_num == INPUT0_SIGNAL_NUM or live_signal_num == INPUT1_SIGNAL_NUM) and preview_signal_num == SBS_SIGNAL_NUM then
 		return {"Cut", "Zoom out"}
 	end
 
@@ -291,8 +299,8 @@ function transition_clicked(num, t)
 			return
 		end
 
-		if (live_signal_num == SBS_SIGNAL_NUM and is_plain_signal(preview_signal_num)) or
-				(preview_signal_num == SBS_SIGNAL_NUM and is_plain_signal(live_signal_num)) then
+		if (live_signal_num == SBS_SIGNAL_NUM and (preview_signal_num == INPUT0_SIGNAL_NUM or preview_signal_num == INPUT1_SIGNAL_NUM)) or
+				(preview_signal_num == SBS_SIGNAL_NUM and (live_signal_num == INPUT0_SIGNAL_NUM or live_signal_num == INPUT1_SIGNAL_NUM)) then
 			start_transition(ZOOM_TRANSITION, t, 1.0)
 		end
 	elseif num == 2 then
@@ -393,7 +401,7 @@ function get_chain(num, t, width, height, signals)
 	read_osc_msg()
 
 	local input_resolution = {}
-	for signal_num=0,1 do
+	for signal_num=0,(NUM_CAMERAS -1) do
 		local res = {
 			width = signals:get_width(signal_num),
 			height = signals:get_height(signal_num),
