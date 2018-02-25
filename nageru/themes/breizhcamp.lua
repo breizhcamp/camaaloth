@@ -11,12 +11,6 @@
 -- where all the low-level details (such as texture formats) are handled by the
 -- C++ side and you generally just build chains.
 
-local transition_start = -2.0
-local transition_end = -1.0
-local transition_type = 0
-local transition_src_signal = 0
-local transition_dst_signal = 0
-
 local neutral_colors = {
 	{0.5, 0.5, 0.5},  -- Input 0.
 	{0.5, 0.5, 0.5},  -- Input 1.
@@ -24,8 +18,6 @@ local neutral_colors = {
 	{0.5, 0.5, 0.5}   -- Input 3.	
 }
 
-local live_signal_num = 0
-local preview_signal_num = 1
 local NUM_CAMERAS = 3  -- Remember to update neutral_colors, too.
 
 -- Valid values for live_signal_num and preview_signal_num.
@@ -39,6 +31,16 @@ local STATIC_SIGNAL_NUM = 4
 local NO_TRANSITION = 0
 local ZOOM_TRANSITION = 1  -- Also for slides.
 local FADE_TRANSITION = 2
+
+-- Current state of the mixing pipeline
+local live_signal_num = STATIC_SIGNAL_NUM
+local preview_signal_num = INPUT1_SIGNAL_NUM
+
+local transition_start = -2.0
+local transition_end = -1.0
+local transition_type = 0
+local transition_src_signal = 0
+local transition_dst_signal = 0
 
 -- Last width/height/frame rate for each channel, if we have it.
 -- Note that unlike the values we get from Nageru, the resolution is per
