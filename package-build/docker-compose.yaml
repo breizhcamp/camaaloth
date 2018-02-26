@@ -6,5 +6,5 @@ services:
     volumes:
       - ./packages:/packages
       - ./target:/target
-    command: ["gbp", "buildpackage", "-uc", "-us", "--git-export-dir=/target/"]
+    command: ["gbp", "buildpackage", "-uc", "-us", "--git-export-dir=/target/", "--git-ignore-new"]
     working_dir: /packages/${PACKAGE_NAME}
