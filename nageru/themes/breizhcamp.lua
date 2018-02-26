@@ -94,12 +94,12 @@ end)
 
 -- A chain to show a single static picture on screen (HQ version).
 local static_chain_hq = EffectChain.new(16, 9)
-local static_chain_hq_input = static_chain_hq:add_effect(ImageInput.new("bg.jpeg"))
+local static_chain_hq_input = static_chain_hq:add_effect(ImageInput.new("./images/static.png"))
 static_chain_hq:finalize(true)
 
 -- A chain to show a single static picture on screen (LQ version).
 local static_chain_lq = EffectChain.new(16, 9)
-local static_chain_lq_input = static_chain_lq:add_effect(ImageInput.new("bg.jpeg"))
+local static_chain_lq_input = static_chain_lq:add_effect(ImageInput.new("./images/static.png"))
 static_chain_lq:finalize(false)
 
 -- Used for indexing into the tables of chains.

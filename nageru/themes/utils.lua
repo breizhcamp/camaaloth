@@ -50,7 +50,7 @@ function make_sbs_chain(input0_signal, input0_type, input1_signal, input1_type, 
 
 	local sbs = chain:add_effect(OverlayEffect.new(), input0.padding_effect, input1.padding_effect)
 
-	local background = chain:add_effect(ImageInput.new("./placeholder.png"))
+	local background = chain:add_effect(ImageInput.new("./images/placeholder.png"))
 	chain:add_effect(OverlayEffect.new(), background, sbs)
 
 	chain:finalize(hq)
@@ -69,7 +69,7 @@ function make_fade_input(chain, signal, live, deint, scale)
 		input:connect_signal(signal)
 		last = input
 	else
-		input = chain:add_effect(ImageInput.new("bg.jpeg"))
+		input = chain:add_effect(ImageInput.new("./images/static.png"))
 		last = input
 	end
 
