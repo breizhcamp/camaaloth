@@ -42,6 +42,9 @@ local transition_type = 0
 local transition_src_signal = 0
 local transition_dst_signal = 0
 
+-- Are slides in 4/3 for SBS?
+local four_third = false
+
 -- Last width/height/frame rate for each channel, if we have it.
 -- Note that unlike the values we get from Nageru, the resolution is per
 -- frame and not per field, since we deinterlace.
@@ -240,7 +243,14 @@ function get_transitions(t)
 	finish_transitions(t)
 
 	if live_signal_num == preview_signal_num then
-		-- No transitions possible.
+		if live_signal_num == SBS_SIGNAL_NUM then
+			if four_third then
+				return {"", "16/9 slides"}
+			else
+				return {"", "4/3 slides"}
+			end
+		end
+			-- No transitions possible.
 		return {}
 	end
 
@@ -290,7 +300,7 @@ function transition_clicked(num, t)
 		finish_transitions(t)
 
 		if live_signal_num == preview_signal_num then
-			-- Nothing to do.
+			four_third = not four_third
 			return
 		end
 
@@ -505,10 +515,16 @@ function prepare_sbs_chain(chain, t, transition_type, src_signal, dst_signal, sc
 	set_neutral_color(chain.input0.wb_effect, neutral_colors[1])
 	set_neutral_color(chain.input1.wb_effect, neutral_colors[2])
 
-	-- First input is positioned (16,48) from top-left.
-	-- Second input is positioned (16,48) from the bottom-right.
-	local pos0 = pos_from_top_left(286, 720 - 651, 973, 547, screen_width, screen_height)
-	local pos1 = pos_from_top_left(20, 720 - 651, 247, 413, screen_width, screen_height)
+	-- First input is computer
+	-- Second input is speaker vignette
+	local pos0,pos1
+	if four_third then
+		pos0 = pos_from_top_left(486, 720 - 685, 773, 580, screen_width, screen_height)
+		pos1 = pos_from_top_left(20, 720 - 685, 440, 447, screen_width, screen_height)
+	else
+		pos0 = pos_from_top_left(286, 720 - 651, 973, 547, screen_width, screen_height)
+		pos1 = pos_from_top_left(20, 720 - 651, 247, 413, screen_width, screen_height)
+	end
 
 	local pos_fs = { x0 = 0, y0 = 0, x1 = screen_width, y1 = screen_height }
 	local affine_param
