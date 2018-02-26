@@ -21,9 +21,9 @@ local neutral_colors = {
 local NUM_CAMERAS = 3  -- Remember to update neutral_colors, too.
 
 -- Valid values for live_signal_num and preview_signal_num.
-local INPUT0_SIGNAL_NUM = 0
-local INPUT1_SIGNAL_NUM = 1
-local INPUT2_SIGNAL_NUM = 2
+local INPUT0_SIGNAL_NUM = 0  -- Computer
+local INPUT1_SIGNAL_NUM = 1  -- Camera 1
+local INPUT2_SIGNAL_NUM = 2  -- Camera 2
 local SBS_SIGNAL_NUM = 3
 local STATIC_SIGNAL_NUM = 4
 

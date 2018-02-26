@@ -221,6 +221,22 @@ function place_rectangle(resample_effect, resize_effect, padding_effect, x0, y0,
 		return
 	end
 
+	local width = math.ceil(x1 - x0)
+	local height = math.ceil(y1 - y0)
+	local distorsion = (width * screen_height) - (screen_width * height)
+
+	if distorsion < -1000 then
+		-- Vertical crop
+		crop = (screen_width - (width * screen_height / height)) / 2
+		srcx0 = crop / (screen_width)
+		srcx1 = 1 - (crop / (screen_width))
+	elseif distorsion > 1000 then
+		-- Horizontal crop
+		crop = (screen_height - (height * screen_width / width)) / 2
+		srcy0 = crop / (screen_height)
+		srcy1 = 1 - (crop / (screen_height))
+	end
+
 	-- Clip.
 	if x0 < 0 then
 		srcx0 = -x0 / (x1 - x0)
@@ -243,11 +259,9 @@ function place_rectangle(resample_effect, resize_effect, padding_effect, x0, y0,
 		-- High-quality resampling.
 		local x_subpixel_offset = x0 - math.floor(x0)
 		local y_subpixel_offset = y0 - math.floor(y0)
-
+	
 		-- Resampling must be to an integral number of pixels. Round up,
 		-- and then add an extra pixel so we have some leeway for the border.
-		local width = math.ceil(x1 - x0) + 1
-		local height = math.ceil(y1 - y0) + 1
 		resample_effect:set_int("width", width)
 		resample_effect:set_int("height", height)
 
@@ -275,8 +289,6 @@ function place_rectangle(resample_effect, resize_effect, padding_effect, x0, y0,
 		padding_effect:set_float("border_offset_bottom", y1 - (math.floor(y0) + height))
 	else
 		-- Lower-quality simple resizing.
-		local width = round(x1 - x0)
-		local height = round(y1 - y0)
 		resize_effect:set_int("width", width)
 		resize_effect:set_int("height", height)
 
