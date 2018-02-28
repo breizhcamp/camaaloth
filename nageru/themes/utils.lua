@@ -224,6 +224,7 @@ function place_rectangle(resample_effect, resize_effect, padding_effect, x0, y0,
 	local width = math.ceil(x1 - x0)
 	local height = math.ceil(y1 - y0)
 	local distorsion = (width * screen_height) - (screen_width * height)
+	local aspect_factor = (width / height) / (screen_width / screen_height)
 
 	if distorsion < -1000 then
 		-- Vertical crop
