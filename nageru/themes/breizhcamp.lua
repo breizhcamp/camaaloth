@@ -51,6 +51,7 @@ local four_third = false
 local last_resolution = {}
 
 require('utils')
+local osc = require("osc")
 
 local socket = require("socket")
 udp = assert(socket.udp())
@@ -368,20 +369,28 @@ function get_sbs_chain(signals, t, width, height, input_resolution)
 	return sbs_chains[input0_type][input1_type][true]
 end
 
-function read_osc_msg()
+function read_osc_msg(t)
 	local dgram, ip, port = udp:receivefrom()
 	if not dgram then
 		return
 	end
-	print("Received '" .. dgram .. "' from " .. ip .. ":" .. port)
 
-	local address, value = parse_osc_msg(dgram)
-	print("Received OSC address [" .. address .. "] with type [" .. oscType .. "] and value [" .. value .. "]")
+    local message = osc.decode_message(dgram)
 
-	if (address == "/preview") then
-		channel_clicked(value)
-	elseif (address == "/transition") then
-		transition_clicked(value, t)
+	-- Mapping for BCR2000
+	if #message == 6 then
+		if message[4] >= 41 and message[4] <= 48 and message[6] == 127 then
+			local channel = message[4]-41
+			if channel < NUM_CAMERAS + 2 then
+				channel_clicked(channel)
+			end
+		end
+		if message[4] >= 33 and message[4] <= 35 and message[6] == 127 then
+			transition_clicked(message[4]-33, t)
+		end
+		if message[4] == 40 and message[6] == 127 then
+			four_third = not four_third 
+		end
 	end
 end
 
@@ -410,7 +419,7 @@ end
 -- NOTE: The chain returned must be finalized with the Y'CbCr flag
 -- if and only if num==0.
 function get_chain(num, t, width, height, signals)
-	read_osc_msg()
+	read_osc_msg(t)
 
 	local input_resolution = {}
 	for signal_num=0,(NUM_CAMERAS -1) do
