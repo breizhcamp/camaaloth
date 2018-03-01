@@ -262,8 +262,8 @@ function decode_frac(bin)
 end	
 
 function decode_float(bin)
-	local pos, res = upack(bin, ">f")
-	return res
+	print('BUG')
+	return 0
 end
 
 function decode_int(bin)
