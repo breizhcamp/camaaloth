@@ -41,6 +41,8 @@ local transition_end = -1.0
 local transition_type = 0
 local transition_src_signal = 0
 local transition_dst_signal = 0
+local transition_duration = 0.7
+
 
 -- Are slides in 4/3 for SBS?
 local four_third = false
@@ -314,7 +316,7 @@ function transition_clicked(num, t)
 
 		if (live_signal_num == SBS_SIGNAL_NUM and (preview_signal_num == INPUT0_SIGNAL_NUM or preview_signal_num == INPUT1_SIGNAL_NUM)) or
 				(preview_signal_num == SBS_SIGNAL_NUM and (live_signal_num == INPUT0_SIGNAL_NUM or live_signal_num == INPUT1_SIGNAL_NUM)) then
-			start_transition(ZOOM_TRANSITION, t, 1.0)
+			start_transition(ZOOM_TRANSITION, t, transition_duration)
 		end
 	elseif num == 2 then
 		finish_transitions(t)
@@ -325,7 +327,7 @@ function transition_clicked(num, t)
 						live_signal_num == STATIC_SIGNAL_NUM) and
 				(is_plain_signal(preview_signal_num) or
 						preview_signal_num == STATIC_SIGNAL_NUM) then
-			start_transition(FADE_TRANSITION, t, 1.0)
+			start_transition(FADE_TRANSITION, t, transition_duration)
 		else
 			-- Fades involving SBS are ignored (we have no chain for it).
 		end
@@ -526,20 +528,25 @@ function prepare_sbs_chain(chain, t, transition_type, src_signal, dst_signal, sc
 
 	-- First input is computer
 	-- Second input is speaker vignette
-	local pos0,pos1
+	local pos0,pos0_end,pos1,pos1_end
 	if four_third then
 		pos0 = pos_from_top_left(486, 720 - 685, 773, 580, screen_width, screen_height)
+		pos0_end = translate(pos0, screen_width - 486 + 20, 0)
 		pos1 = pos_from_top_left(20, 720 - 685, 440, 447, screen_width, screen_height)
+		pos1_end = translate(pos1, -(440+20+20), 0)
 	else
 		pos0 = pos_from_top_left(286, 720 - 651, 973, 547, screen_width, screen_height)
+		pos0_end = translate(pos0, screen_width - 286 - 20, 0)
 		pos1 = pos_from_top_left(20, 720 - 651, 247, 413, screen_width, screen_height)
+		pos1_end = translate(pos1, -(247+20+20), 0)
 	end
 
 	local pos_fs = { x0 = 0, y0 = 0, x1 = screen_width, y1 = screen_height }
-	local affine_param
+	local affine_param0,affine_param1
 	if transition_type == NO_TRANSITION then
 		-- Static SBS view.
-		affine_param = { sx = 1.0, sy = 1.0, tx = 0.0, ty = 0.0 }   -- Identity.
+		affine_param0 = { sx = 1.0, sy = 1.0, tx = 0.0, ty = 0.0 }   -- Identity.
+		affine_param1 = { sx = 1.0, sy = 1.0, tx = 0.0, ty = 0.0 }   -- Identity.
 	else
 		-- Zooming to/from SBS view into or out of a single view.
 		assert(transition_type == ZOOM_TRANSITION)
@@ -554,15 +561,17 @@ function prepare_sbs_chain(chain, t, transition_type, src_signal, dst_signal, sc
 		end
 
 		if signal == INPUT0_SIGNAL_NUM then
-			affine_param = find_affine_param(pos0, lerp_pos(pos0, pos_fs, real_t))
+			affine_param0 = find_affine_param(pos0, lerp_pos(pos0, pos_fs, real_t))
+			affine_param1 = find_affine_param(pos1, lerp_pos(pos1, pos1_end, real_t))
 		elseif signal == INPUT1_SIGNAL_NUM then
-			affine_param = find_affine_param(pos1, lerp_pos(pos1, pos_fs, real_t))
+			affine_param1 = find_affine_param(pos1, lerp_pos(pos1, pos_fs, real_t))
+			affine_param0 = find_affine_param(pos0, lerp_pos(pos0, pos0_end, real_t))
 		end
 	end
 
 	-- NOTE: input_resolution is not 1-indexed, unlike usual Lua arrays.
-	place_rectangle_with_affine(chain.input0.resample_effect, chain.input0.resize_effect, chain.input0.padding_effect, pos0, affine_param, screen_width, screen_height, input_resolution[0].width, input_resolution[0].height)
-	place_rectangle_with_affine(chain.input1.resample_effect, chain.input1.resize_effect, chain.input1.padding_effect, pos1, affine_param, screen_width, screen_height, input_resolution[1].width, input_resolution[1].height)
+	place_rectangle_with_affine(chain.input0.resample_effect, chain.input0.resize_effect, chain.input0.padding_effect, pos0, affine_param0, screen_width, screen_height, input_resolution[0].width, input_resolution[0].height)
+	place_rectangle_with_affine(chain.input1.resample_effect, chain.input1.resize_effect, chain.input1.padding_effect, pos1, affine_param1, screen_width, screen_height, input_resolution[1].width, input_resolution[1].height)
 end
 
 

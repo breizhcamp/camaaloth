@@ -223,19 +223,19 @@ function place_rectangle(resample_effect, resize_effect, padding_effect, x0, y0,
 
 	local width = math.ceil(x1 - x0)
 	local height = math.ceil(y1 - y0)
-	local distorsion = (width * screen_height) - (screen_width * height)
-	local aspect_factor = (width / height) / (screen_width / screen_height)
+	local distorsion = (width * input_height) - (input_width * height)
+	local aspect_factor = (width / height) / (input_width / input_height)
 
 	if distorsion < -1000 then
 		-- Vertical crop
-		crop = (screen_width - (width * screen_height / height)) / 2
-		srcx0 = crop / (screen_width)
-		srcx1 = 1 - (crop / (screen_width))
+		crop = (input_width - (width * input_height / height)) / 2
+		srcx0 = crop / (input_width)
+		srcx1 = 1 - (crop / (input_width))
 	elseif distorsion > 1000 then
 		-- Horizontal crop
-		crop = (screen_height - (height * screen_width / width)) / 2
-		srcy0 = crop / (screen_height)
-		srcy1 = 1 - (crop / (screen_height))
+		crop = (input_height - (height * input_width / width)) / 2
+		srcy0 = crop / (input_height)
+		srcy1 = 1 - (crop / (input_height))
 	end
 
 	-- Clip.
@@ -244,8 +244,8 @@ function place_rectangle(resample_effect, resize_effect, padding_effect, x0, y0,
 		x0 = 0
 	end
 	if y0 < 0 then
-		srcy0 = (-y0 / (y1 - y0)) * aspect_factor + srcy0
-		y0 = 0
+		srcy0 = -y0 / (y1 - y0)
+		realy0 = 0
 	end
 	if x1 > screen_width then
 		srcx1 = (screen_width - x0) / (x1 - x0)
@@ -254,6 +254,13 @@ function place_rectangle(resample_effect, resize_effect, padding_effect, x0, y0,
 	if y1 > screen_height then
 		srcy1 = (screen_height - y0) / (y1 - y0)
 		y1 = screen_height
+	end
+
+	if srcx0 > srcx1 then
+		srcx1 = srcx0
+	end
+	if srcy0 > srcy1 then
+		srcy1 = srcy0
 	end
 
 	if resample_effect ~= nil then
@@ -337,6 +344,15 @@ function find_affine_param(a, b)
 		sy = sy,
 		tx = b.x0 - a.x0 * sx,
 		ty = b.y0 - a.y0 * sy
+	}
+end
+
+function translate(pos, x, y)
+	return {
+		x0 = pos.x0 + x,
+		y0 = pos.y0 + y,
+		x1 = pos.x1 + x,
+		y1 = pos.y1 + y
 	}
 end
 
