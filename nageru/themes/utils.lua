@@ -239,14 +239,6 @@ function place_rectangle(resample_effect, resize_effect, padding_effect, x0, y0,
 	end
 
 	-- Clip.
-	if x0 < 0 then
-		srcx0 = (-x0 / (x1 - x0)) * aspect_factor + srcx0
-		x0 = 0
-	end
-	if y0 < 0 then
-		srcy0 = -y0 / (y1 - y0)
-		realy0 = 0
-	end
 	if x1 > screen_width then
 		srcx1 = (screen_width - x0) / (x1 - x0)
 		x1 = screen_width
