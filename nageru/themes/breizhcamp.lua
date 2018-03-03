@@ -379,18 +379,27 @@ function read_osc_msg(t)
 
     local message = osc.decode_message(dgram)
 
-	-- Mapping for BCR2000
+	-- Mapping for Akai MPD218
 	if #message == 6 then
-		if message[4] >= 41 and message[4] <= 48 and message[6] == 127 then
-			local channel = message[4]-41
-			if channel < NUM_CAMERAS + 2 then
+		local button = message[4]
+		local value = message[6]
+		if button >= 48 and button <= 51 and not (value == 0) then
+			print ("change cam")
+			local channel = message[4]-48
+			if channel < NUM_CAMERAS then
 				channel_clicked(channel)
 			end
 		end
-		if message[4] >= 33 and message[4] <= 35 and message[6] == 127 then
-			transition_clicked(message[4]-33, t)
+		if button >= 44 and button <= 47 and not (value == 0) then
+			local channel = button - 44
+			if channel <= 1 then
+				channel_clicked(channel + NUM_CAMERAS)
+			end
 		end
-		if message[4] == 40 and message[6] == 127 then
+		if button >= 40 and button < 43 and not (value == 0)  then
+			transition_clicked(button - 40, t)
+		end
+		if button == 43 and not (value == 0) then
 			four_third = not four_third 
 		end
 	end
