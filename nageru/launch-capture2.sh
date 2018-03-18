@@ -9,8 +9,9 @@ nageru -I. -tbreizhcamp.lua \
  --map-signal=1,2 \
  --map-signal=2,3 \
  --map-signal=3,0 \
+ --prefer-sdi \
  --alsa-delay=73 --disable-alsa-output --audio-queue-length-ms=150 \
- --input-mapping="$HERE/focusrite.mapping" \
+ --input-mapping="$HERE/focusrite-18i20.mapping" \
  --disable-gain-staging-auto \
  --recording-dir="$HOME/Vidéos/" \
  --full-screen \
