@@ -13,4 +13,5 @@ nageru -I. -tbreizhcamp.lua \
  --input-mapping="$HERE/focusrite.mapping" \
  --disable-gain-staging-auto \
  --recording-dir="$HOME/Vidéos/" \
+ --full-screen \
  "$@"
