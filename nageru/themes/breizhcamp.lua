@@ -15,17 +15,19 @@ local neutral_colors = {
 	{0.5, 0.5, 0.5},  -- Input 0.
 	{0.5, 0.5, 0.5},  -- Input 1.
 	{0.5, 0.5, 0.5},  -- Input 2.
-	{0.5, 0.5, 0.5}   -- Input 3.	
+	{0.5, 0.5, 0.5},  -- Input 3.	
+	{0.5, 0.5, 0.5}   -- Input 4.	
 }
 
-local NUM_CAMERAS = 3  -- Remember to update neutral_colors, too.
+local NUM_CAMERAS = 4  -- Remember to update neutral_colors, too.
 
 -- Valid values for live_signal_num and preview_signal_num.
 local INPUT0_SIGNAL_NUM = 0  -- Computer
 local INPUT1_SIGNAL_NUM = 1  -- Camera 1
 local INPUT2_SIGNAL_NUM = 2  -- Camera 2
-local SBS_SIGNAL_NUM = 3
-local STATIC_SIGNAL_NUM = 4
+local INPUT3_SIGNAL_NUM = 3  -- Camera 3
+local SBS_SIGNAL_NUM = 4
+local STATIC_SIGNAL_NUM = 5
 
 -- Valid values for transition_type. (Cuts are done directly, so they need no entry.)
 local NO_TRANSITION = 0
@@ -148,6 +150,8 @@ function channel_name(channel)
 		return "Camera 1 " .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
 	elseif signal_num == INPUT2_SIGNAL_NUM then
 		return "Camera 2" .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
+	elseif signal_num == INPUT3_SIGNAL_NUM then
+		return "Camera 3" .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
 	elseif signal_num == SBS_SIGNAL_NUM then
 		return "Side-by-side"
 	elseif signal_num == STATIC_SIGNAL_NUM then
@@ -163,10 +167,9 @@ end
 -- Called once for each channel, at the start of the program.
 -- Will never be called for live (0) or preview (1).
 function channel_signal(channel)
-	if channel == 2 then
-		return 0
-	elseif channel == 3 then
-		return 1
+	signal_num = channel -2
+	if is_plain_signal(signal_num) then
+		return signal_num
 	else
 		return -1
 	end
@@ -202,7 +205,7 @@ function channel_involved_in(channel, signal_num)
 		return (channel == 2 or channel == 3)
 	end
 	if signal_num == STATIC_SIGNAL_NUM then
-		return (channel == 5)
+		return (channel == NUM_CAMERAS + 2 + 1)
 	end
 	return false
 end
@@ -530,10 +533,10 @@ end
 
 
 function prepare_sbs_chain(chain, t, transition_type, src_signal, dst_signal, screen_width, screen_height, input_resolution)
-	chain.input0.input:connect_signal(0)
-	chain.input1.input:connect_signal(1)
-	set_neutral_color(chain.input0.wb_effect, neutral_colors[1])
-	set_neutral_color(chain.input1.wb_effect, neutral_colors[2])
+	chain.input0.input:connect_signal(INPUT0_SIGNAL_NUM)
+	chain.input1.input:connect_signal(INPUT1_SIGNAL_NUM)
+	set_neutral_color(chain.input0.wb_effect, neutral_colors[INPUT0_SIGNAL_NUM + 1])
+	set_neutral_color(chain.input1.wb_effect, neutral_colors[INPUT0_SIGNAL_NUM + 2])
 
 	-- First input is computer
 	-- Second input is speaker vignette
