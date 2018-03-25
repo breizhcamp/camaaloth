@@ -1,0 +1,50 @@
+device {
+  type: ALSA_INPUT
+  index: 1
+  display_name: "Scarlett 18i8 USB (USB Audio)"
+  alsa_name: "Scarlett 18i8 USB"
+  alsa_info: "USB Audio"
+  num_channels: 18
+  address: "hw:1,0"
+}
+device {
+  type: CAPTURE_CARD
+  index: 1
+  display_name: "PCI card 1: Intensity Pro 4K"
+}
+bus {
+  name: "Serre tete (1)"
+  device_index: 0
+  source_channel_left: 0
+  source_channel_right: 0
+}
+bus {
+  name: "Serre tete (2)"
+  device_index: 0
+  source_channel_left: 1
+  source_channel_right: 1
+}
+bus {
+  name: "Main (3)"
+  device_index: 0
+  source_channel_left: 2
+  source_channel_right: 2
+}
+bus {
+  name: "Main (4)"
+  device_index: 0
+  source_channel_left: 3
+  source_channel_right: 3
+}
+bus {
+  name: "Aux (5/6)"
+  device_index: 0
+  source_channel_left: 4
+  source_channel_right: 5
+}
+bus {
+  name: "PC"
+  device_index: 1
+  source_channel_left: 0
+  source_channel_right: 1
+}
