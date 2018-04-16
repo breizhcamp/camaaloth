@@ -5,11 +5,11 @@ for i in "$@";  do
     if [[ ! -r intro.ts ]]; then
     ffmpeg -y -i ../intro-empty.ts -loop 1 -t 6 -i intro.png \
         -filter_complex "[1:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v0];[v0]scale=-2:720[v1];[0:v][v1]overlay" \
-        -acodec copy -c:v libx264 -preset veryslow -crf 10 \
+        -acodec copy -c:v libx264 -preset veryslow -crf 6 \
         intro.ts
     fi
 
-    source="$(find . -type f -name 'record*.mkv' | head -n 1)"
+    source="$(find . -type f -name 'record*.nut' | head -n 1)"
     start_time="$(cat start_time)" # HH:MM:SS seek time notation in FFmpeg
     echo "$start_time" | grep -q "^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$"
     valid_ts=$?
@@ -18,6 +18,7 @@ for i in "$@";  do
     fi 
     if [[ ! -r video.ts && -r start_time && -r $source && valid_ts ]]; then
         seek_arg="00:00:00"
+        seek_ts="00.000"
         start_time_in_sec="00"
         if [[ $start_time != "00:00:00" ]]; then
             # We look for the keyframe just before the start time to accurately cut the source file and use copy codec
@@ -40,10 +41,11 @@ for i in "$@";  do
         ffmpeg -y -i "$source" -ss "$seek_arg" -ab 192k -af "afade=t=in:st=$start_time_in_sec:d=3" -acodec aac -vcodec copy video.ts
     fi
 
-    if [[ ! -r final.mp4 && -r video.ts ]]; then
+    # mkv has the lowest MUX overhead, so use that for the final round
+    if [[ ! -r final.mkv && -r video.ts ]]; then
     ffmpeg -y -i "concat:intro.ts|video.ts" \
         -acodec copy -c:v copy \
-        final.mp4
+        final.mkv
     fi
     popd
 done
