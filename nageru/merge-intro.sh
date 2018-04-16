@@ -10,13 +10,14 @@ for i in "$@";  do
     fi
 
     source="$(find . -type f -name 'record*.nut' | head -n 1)"
+    if [[ -r start_time && -r $source ]]; then
     start_time="$(cat start_time)" # HH:MM:SS seek time notation in FFmpeg
     echo "$start_time" | grep -q "^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$"
     valid_ts=$?
     if [[ ! valid_ts ]]; then
         echo "Invalid timestamp in start_time file"
     fi 
-    if [[ ! -r video.ts && -r start_time && -r $source && valid_ts ]]; then
+    if [[ ! -r video.ts && valid_ts ]]; then
         seek_arg="00:00:00"
         seek_ts="00.000"
         start_time_in_sec="00"
@@ -39,6 +40,7 @@ for i in "$@";  do
         seek_arg="$(($seek_sec / 3600)):$(($seek_sec / 60)):$(($seek_sec % 60)).${seek_ts#*.}"
         echo $seek_arg
         ffmpeg -y -i "$source" -ss "$seek_arg" -ab 192k -af "afade=t=in:st=$start_time_in_sec:d=3" -acodec aac -vcodec copy video.ts
+    fi
     fi
 
     # mkv has the lowest MUX overhead, so use that for the final round
