@@ -1,11 +1,25 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout}">
 <head>
-
 </head>
+
 <body>
-<section layout:fragment="content">
-	<p>This is a paragraph from content page 1</p>
-</section>
+
+<div class="row" layout:fragment="content">
+	<div class="col-sm jumbotron">
+		<img src="/static/img/breizhcamp-logo.svg" th:src="@{/img/breizhcamp-logo.svg}" class="float-right" width="150" height="150">
+		<h1 class="display-3">Camaaloth</h1>
+		<p class="lead">by BreizhCamp</p>
+
+		<hr class="my-4">
+
+		<p>Configure et lance la capture vidéo pour les users groups.</p>
+		<p>La navigation peut se faire à l'aide du pad, appuyez sur n'importe quel bouton du pad pour commencer.</p>
+
+		<a class="btn btn-primary btn-lg" href="#">Commencer</a>
+	</div>
+</div>
+
 </body>
 </html>
