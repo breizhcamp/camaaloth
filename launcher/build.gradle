@@ -50,6 +50,7 @@ dependencies {
 	compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	compile("org.jetbrains.kotlin:kotlin-reflect")
 	compile('com.fasterxml.jackson.module:jackson-module-kotlin')
+	compile('io.github.microutils:kotlin-logging:1.6.10')
 
 	compile('org.webjars.npm:webstomp-client:1.2.4')
 	compile('org.webjars.npm:jquery:3.3.1')
