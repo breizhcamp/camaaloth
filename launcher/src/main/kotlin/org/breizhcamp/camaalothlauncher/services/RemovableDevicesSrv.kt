@@ -29,6 +29,10 @@ class RemovableDevicesSrv {
         udevAdmMonitor.shutdown()
     }
 
+    fun readPartitions() {
+        println("read partitions")
+    }
+
     /**
      * Thread that's run "udevadm monitor" to watch changes in mount and umount filesystems.
      *
@@ -36,7 +40,7 @@ class RemovableDevicesSrv {
      *  KERNEL[4518.603613] add      /devices/virtual/bdi/
      *  KERNEL[5311.976541] remove   /devices/virtual/bdi/8:32 (bdi)
      */
-    private class UdevAdmMonitor : Thread("UdevAdmMonitor") {
+    private inner class UdevAdmMonitor : Thread("UdevAdmMonitor") {
         val run = AtomicBoolean(true)
 
         override fun run() {
@@ -45,8 +49,7 @@ class RemovableDevicesSrv {
             while (run.get()) {
                 logger.info { "Watching mount with command : [$cmd]" }
                 val udev = ProcessBuilder(cmd).redirectErrorStream(true).start()
-                ReadStream(udev.inputStream, "UdevAdmMonitorInput").start()
-                ReadStream(udev.errorStream, "UdevAdmMonitorError").start()
+                ReadUdevAdmStream(udev.inputStream, "UdevAdmMonitorInput").start()
 
                 try {
                     val waitFor = udev.waitFor()
@@ -58,7 +61,7 @@ class RemovableDevicesSrv {
                     Thread.sleep(2000)
                 } catch (e: InterruptedException) {
                     logger.info("udevadm monitor interrupted")
-                    Thread.currentThread().interrupt();
+                    Thread.currentThread().interrupt()
                 }
             }
         }
@@ -66,12 +69,15 @@ class RemovableDevicesSrv {
         fun shutdown() = run.set(false)
     }
 
-    private class ReadStream(val inputStream: InputStream, name: String) : Thread(name) {
+    /** Read input stream of UdevAdm and start readPartitions() when new line read */
+    private inner class ReadUdevAdmStream(private val inputStream: InputStream, name: String) : Thread(name) {
+
         override fun run() {
-            inputStream.bufferedReader().forEachLine {
-                logger.debug { it }
-                if (it.contains("/devices/virtual/bdi/")) {
-                    //call timer, if nothing happens 300ms later, check lsblk
+            inputStream.bufferedReader().forEachLine { line ->
+                logger.debug { "Udevadm Monitor : $line" }
+
+                if (line.contains("/devices/virtual/bdi/")) {
+                    readPartitions()
                 }
             }
         }
