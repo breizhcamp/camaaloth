@@ -5,10 +5,13 @@ import mu.KotlinLogging
 import org.breizhcamp.camaalothlauncher.dto.FileMeta
 import org.breizhcamp.camaalothlauncher.dto.LsblkDto
 import org.breizhcamp.camaalothlauncher.dto.Partition
+import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.springframework.stereotype.Service
+import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.stream.Collectors
+import java.util.zip.ZipFile
 
 private val logger = KotlinLogging.logger {}
 
@@ -56,4 +59,23 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
         return res
     }
 
+    /**
+     * @return the talk informations read from the zip [file]
+     */
+    fun readTalkSession(file: String) : TalkSession {
+        val zipFile = Paths.get(file)
+        if (Files.notExists(zipFile)) throw FileNotFoundException("[$file] doesn't exists")
+
+        val zip = ZipFile(file)
+        val entries = zip.entries()
+
+        while (entries.hasMoreElements()) {
+            val entry = entries.nextElement()
+
+            if (entry.name == "infos.json") {
+                return objectMapper.readValue(zip.getInputStream(entry), TalkSession::class.java)
+            }
+        }
+        throw FileNotFoundException("Cannot found [infos.json] in zip file [$file]")
+    }
 }
