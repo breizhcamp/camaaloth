@@ -2,9 +2,12 @@ package org.breizhcamp.camaalothlauncher.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
+import org.breizhcamp.camaalothlauncher.dto.FileMeta
 import org.breizhcamp.camaalothlauncher.dto.LsblkDto
 import org.breizhcamp.camaalothlauncher.dto.Partition
 import org.springframework.stereotype.Service
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.stream.Collectors
 
 private val logger = KotlinLogging.logger {}
@@ -13,10 +16,10 @@ private val logger = KotlinLogging.logger {}
  * Retrieve, watch and notify removable drives found on the computer
  */
 @Service
-class RemovableDevicesSrv(private val objectMapper: ObjectMapper) {
+class FilesSrv(private val objectMapper: ObjectMapper) {
 
     /** @return The list of removable and mounted partitions */
-    fun readPartitions(): ArrayList<Partition> {
+    fun readPartitions(): List<Partition> {
         //lsblk -o NAME,MOUNTPOINT,VENDOR,LABEL,MODEL,HOTPLUG,SIZE -J
         val cmd = listOf("lsblk", "-o", "NAME,MOUNTPOINT,VENDOR,LABEL,MODEL,HOTPLUG,SIZE", "-J")
         logger.info { "Retrieving partitions with command : [$cmd]" }
@@ -35,6 +38,22 @@ class RemovableDevicesSrv(private val objectMapper: ObjectMapper) {
         }
 
         return partitions
+    }
+
+    /**
+     * @return files matching the [pattern] at root of the specified [partitions]
+     */
+    fun getFilesFromPartitions(partitions: List<Partition>, pattern: String) : List<FileMeta> {
+        val res = ArrayList<FileMeta>()
+
+        for (partition in partitions) {
+            Files.newDirectoryStream(Paths.get(partition.mountpoint), pattern).forEach {
+                res.add(FileMeta(it.fileName.toString(), it.parent.toString(),
+                        Files.getLastModifiedTime(it).toInstant(), partition))
+            }
+        }
+
+        return res
     }
 
 }
