@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout}">
+<head>
+</head>
+
+<body>
+<div layout:fragment="content">
+	<div th:replace="stepper :: stepper(step = 1)"></div>
+
+	<div class="row">
+		<div class="col-sm jumbotron jumbo-light">
+			<p class="text-center">
+				Veuillez brancher une clé usb <i class="fab fa-usb"></i> contenant au moins un fichier xxx.<strong>ug.zip</strong>
+				et sélectionnez le talk voulu.
+			</p>
+		</div>
+	</div>
+</div>
+
+</body>
+</html>

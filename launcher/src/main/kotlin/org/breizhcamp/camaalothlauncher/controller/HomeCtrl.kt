@@ -11,4 +11,8 @@ class HomeCtrl {
         return "000-home"
     }
 
+    @GetMapping("/010-talk-choice")
+    fun talkChoix() : String {
+        return "010-talk-choice"
+    }
 }

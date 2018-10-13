@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div class="stepwizard col-sm" th:fragment="stepper">
+	<div class="stepwizard-row setup-panel">
+		<div class="stepwizard-step">
+			<a th:href="@{/010-talk-choice}" type="button" class="btn btn-circle" th:classappend="${step == 1} ? 'btn-primary' : 'btn-info'">1</a>
+			<p>Talk</p>
+		</div>
+		<div class="stepwizard-step">
+			<a th:href="@{/020-preview}" type="button" class="btn btn-circle" th:classappend="${step == 2} ? 'btn-primary' : 'btn-info'">2</a>
+			<p>Preview</p>
+		</div>
+		<div class="stepwizard-step">
+			<a th:href="@{/030-live}" type="button" class="btn btn-circle" th:classappend="${step == 3} ? 'btn-primary' : 'btn-info'">3</a>
+			<p>Live</p>
+		</div>
+		<div class="stepwizard-step">
+			<a th:href="@{/040-export}" type="button" class="btn btn-circle" th:classappend="${step == 4} ? 'btn-primary' : 'btn-info'">4</a>
+			<p>Export</p>
+		</div>
+		<div class="stepwizard-step">
+			<a th:href="@{/050-copy}" type="button" class="btn btn-circle" th:classappend="${step == 5} ? 'btn-primary' : 'btn-info'">5</a>
+			<p>Copie</p>
+		</div>
+	</div>
+</div>
+</body>
+</html>
