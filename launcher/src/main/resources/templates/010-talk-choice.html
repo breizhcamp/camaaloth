@@ -50,7 +50,7 @@
 								<li v-for="speaker in f.talk.speakers">{{speaker.name}}</li>
 							</ul>
 
-							<a href="#" class="btn btn-primary">Filmer ce talk</a>
+							<a :href="'020-preview?file=' + f.path + '/' + f.name" class="btn btn-primary">Filmer ce talk</a>
 						</div>
 					</div>
 				</div>

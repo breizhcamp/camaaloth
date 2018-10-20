@@ -5,14 +5,10 @@ import mu.KotlinLogging
 import org.breizhcamp.camaalothlauncher.dto.FileMeta
 import org.breizhcamp.camaalothlauncher.dto.LsblkDto
 import org.breizhcamp.camaalothlauncher.dto.Partition
-import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.springframework.stereotype.Service
-import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.stream.Collectors
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
 
 private val logger = KotlinLogging.logger {}
 
@@ -60,45 +56,5 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
         }
 
         return res
-    }
-
-    /**
-     * @return the talk informations (and logo) read from the zip [file]
-     */
-    fun readTalkSession(file: String) : TalkSession {
-        val zipFile = Paths.get(file)
-        if (Files.notExists(zipFile)) throw FileNotFoundException("[$file] doesn't exists")
-
-        ZipFile(file).use { zip ->
-            val entries = zip.entries()
-
-            var infos: TalkSession? = null
-            var logo: ByteArray? = null
-
-            while (entries.hasMoreElements()) {
-                val entry = entries.nextElement()
-
-                if (entry.name == "infos.json") {
-                    infos = convertToTalk(zip, entry)
-                }
-
-                if (entry.name == "logo.png") {
-                    logo = zip.getInputStream(entry).use { it.readBytes() }
-                }
-            }
-
-            if (infos == null) {
-                throw FileNotFoundException("Cannot found [infos.json] in zip file [$file]")
-            }
-
-            infos.logo = logo
-            return infos
-        }
-    }
-
-    private fun convertToTalk(zip: ZipFile, entry: ZipEntry?): TalkSession {
-        zip.getInputStream(entry).use {
-            return objectMapper.readValue(it, TalkSession::class.java)
-        }
     }
 }
