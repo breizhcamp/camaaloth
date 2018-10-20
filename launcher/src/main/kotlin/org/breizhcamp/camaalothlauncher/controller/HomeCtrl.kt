@@ -22,6 +22,7 @@ class HomeCtrl(private val talkSrv: TalkSrv) {
     @GetMapping("/020-preview")
     fun preview(@RequestParam file: String, model: Model) : String {
         val currentTalk = talkSrv.setCurrentTalkFromFile(file)
+        talkSrv.createCurrentTalkDir()
         model.addAttribute("talk", currentTalk)
         return "020-preview"
     }

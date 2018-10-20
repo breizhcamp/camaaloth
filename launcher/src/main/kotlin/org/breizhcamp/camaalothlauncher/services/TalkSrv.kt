@@ -1,11 +1,13 @@
 package org.breizhcamp.camaalothlauncher.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.springframework.stereotype.Service
 import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDate
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -13,7 +15,7 @@ import java.util.zip.ZipFile
  * Manage Talk Data (zip...)
  */
 @Service
-class TalkSrv(private val objectMapper: ObjectMapper) {
+class TalkSrv(private val objectMapper: ObjectMapper, private val props: CamaalothProps) {
 
     var currentTalk: TalkSession? = null
 
@@ -55,6 +57,18 @@ class TalkSrv(private val objectMapper: ObjectMapper) {
     fun setCurrentTalkFromFile(file: String): TalkSession? {
         currentTalk = readTalkSession(file, false)
         return currentTalk
+    }
+
+    /** Create directory for current dir */
+    fun createCurrentTalkDir() {
+        val t = currentTalk ?: return
+
+        val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
+        val dir = Paths.get(props.recordingDir, dirName.replace('/', '-'))
+
+        if (Files.notExists(dir)) {
+            Files.createDirectories(dir)
+        }
     }
 
     private fun convertToTalk(zip: ZipFile, entry: ZipEntry?): TalkSession {
