@@ -9,5 +9,6 @@ data class TalkSession (
         var name: String,
         var date: LocalDate,
         var talk: String,
-        var speakers: List<Speaker>
+        var speakers: List<Speaker>,
+        var logo: ByteArray?
 )

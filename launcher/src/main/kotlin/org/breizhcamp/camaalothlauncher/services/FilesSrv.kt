@@ -11,6 +11,7 @@ import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.stream.Collectors
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 private val logger = KotlinLogging.logger {}
@@ -50,9 +51,11 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
         val res = ArrayList<FileMeta>()
 
         for (partition in partitions) {
-            Files.newDirectoryStream(Paths.get(partition.mountpoint), pattern).forEach {
-                res.add(FileMeta(it.fileName.toString(), it.parent.toString(),
-                        Files.getLastModifiedTime(it).toInstant(), partition))
+            Files.newDirectoryStream(Paths.get(partition.mountpoint), pattern).use { stream ->
+                stream.forEach {
+                    res.add(FileMeta(it.fileName.toString(), it.parent.toString(),
+                            Files.getLastModifiedTime(it).toInstant(), partition))
+                }
             }
         }
 
@@ -60,22 +63,42 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
     }
 
     /**
-     * @return the talk informations read from the zip [file]
+     * @return the talk informations (and logo) read from the zip [file]
      */
     fun readTalkSession(file: String) : TalkSession {
         val zipFile = Paths.get(file)
         if (Files.notExists(zipFile)) throw FileNotFoundException("[$file] doesn't exists")
 
-        val zip = ZipFile(file)
-        val entries = zip.entries()
+        ZipFile(file).use { zip ->
+            val entries = zip.entries()
 
-        while (entries.hasMoreElements()) {
-            val entry = entries.nextElement()
+            var infos: TalkSession? = null
+            var logo: ByteArray? = null
 
-            if (entry.name == "infos.json") {
-                return objectMapper.readValue(zip.getInputStream(entry), TalkSession::class.java)
+            while (entries.hasMoreElements()) {
+                val entry = entries.nextElement()
+
+                if (entry.name == "infos.json") {
+                    infos = convertToTalk(zip, entry)
+                }
+
+                if (entry.name == "logo.png") {
+                    logo = zip.getInputStream(entry).use { it.readBytes() }
+                }
             }
+
+            if (infos == null) {
+                throw FileNotFoundException("Cannot found [infos.json] in zip file [$file]")
+            }
+
+            infos.logo = logo
+            return infos
         }
-        throw FileNotFoundException("Cannot found [infos.json] in zip file [$file]")
+    }
+
+    private fun convertToTalk(zip: ZipFile, entry: ZipEntry?): TalkSession {
+        zip.getInputStream(entry).use {
+            return objectMapper.readValue(it, TalkSession::class.java)
+        }
     }
 }

@@ -6,6 +6,10 @@ body {
 	padding: 2rem;
 }
 
+.jumbotron.jumbo-light p {
+	margin-bottom: 0;
+}
+
 .stepwizard-step p {
 	margin-top: 10px;
 }

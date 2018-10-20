@@ -2,6 +2,24 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	  layout:decorate="~{layout}">
 <head>
+	<script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
+	<script src="/webjars/moment/2.22.2/min/moment-with-locales.min.js"></script>
+	<script src="/webjars/vue-moment/4.0.0/dist/vue-moment.min.js"></script>
+	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
+
+	<style>
+		#cards li {
+			font-style: italic;
+		}
+
+		#cards .card-text {
+			font-weight: bold;
+		}
+
+		#cards .card-subtitle {
+			font-size: 80%;
+		}
+	</style>
 </head>
 
 <body>
@@ -16,7 +34,88 @@
 			</p>
 		</div>
 	</div>
-</div>
 
+	<div id="cards">
+		<div class="row" v-for="i in Math.ceil(files.length / 4)">
+			<div class="col-sm-3" v-for="f in files.slice((i - 1) * 4, i * 4)">
+				<div class="card">
+					<div v-if="f.talk">
+						<img class="card-img-top" :src="'data:image/jpeg;base64,' + f.talk.logo" :alt="f.talk.name" v-if="f.talk.logo">
+						<div class="card-body">
+							<h5 class="card-title" v-if="!f.talk.logo">{{f.talk.name}}</h5>
+							<h6 class="card-subtitle mb-2 text-muted">{{f.talk.date | moment("dddd Do MMMM YYYY")}}</h6>
+							<p class="card-text">{{f.talk.talk}}</p>
+
+							<ul class="list-unstyled">
+								<li v-for="speaker in f.talk.speakers">{{speaker.name}}</li>
+							</ul>
+
+							<a href="#" class="btn btn-primary">Filmer ce talk</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<script>
+		moment.locale('fr')
+		Vue.use(vueMoment, { moment })
+		new Vue({
+			el: '#cards',
+			data: {
+				files: []
+			},
+
+			created() {
+				this.loadFiles()
+			},
+
+			methods: {
+				loadFiles() {
+					axios.get('/files').then(res => {
+						this.updateTalks(res.data)
+					})
+				},
+
+				updateTalks(newFiles) {
+					//update existing files
+					for (let file of this.files) {
+						let newFile = newFiles.find(f => f.name === file.name && f.path === file.path);
+
+						if (newFile) {
+							newFile.processed = true
+							if (file.lastModified !== newFile.lastModified) {
+								Vue.set(file, 'lastModified', newFile.lastModified)
+								this.updateTalk(file)
+							}
+
+						} else {
+							file.delete = true
+						}
+					}
+
+					//remove file
+					this.files = this.files.filter(f => !f.delete)
+
+					//add new files
+					newFiles.filter(f => !f.processed).forEach(f => {
+						this.files.push(f)
+						this.updateTalk(f)
+					})
+
+					setTimeout(() => this.loadFiles(), 1000)
+				},
+
+				updateTalk(file) {
+					axios.get('/files/talk', { params: { file: file.path + '/' + file.name }}).then(res => {
+						Vue.set(file, 'talk', res.data)
+					})
+				}
+			}
+		})
+	</script>
+</div>
 </body>
 </html>
