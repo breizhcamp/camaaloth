@@ -1,5 +1,6 @@
 package org.breizhcamp.camaalothlauncher.controller
 
+import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.breizhcamp.camaalothlauncher.services.TalkSrv
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -20,11 +21,25 @@ class HomeCtrl(private val talkSrv: TalkSrv) {
     }
 
     @GetMapping("/020-preview")
-    fun preview(@RequestParam file: String, model: Model) : String {
-        val currentTalk = talkSrv.setCurrentTalkFromFile(file)
-        talkSrv.createCurrentTalkDir()
-        talkSrv.extractImagesToThemeDir(file)
-        model.addAttribute("talk", currentTalk)
+    fun preview(@RequestParam file: String?, model: Model) : String {
+        val talk: TalkSession?
+        if (file != null) {
+            talk = talkSrv.setCurrentTalkFromFile(file)
+            talkSrv.createCurrentTalkDir()
+            talkSrv.extractImagesToThemeDir(file)
+        } else {
+            talk = talkSrv.getCurrentTalk() ?: return "redirect:010-talk-choice"
+        }
+
+        model.addAttribute("talk", talk)
         return "020-preview"
+    }
+
+    @GetMapping("/030-live")
+    fun live(model: Model) : String {
+        val talk = talkSrv.getCurrentTalk() ?: return "redirect:010-talk-choice"
+
+        model.addAttribute("talk", talk)
+        return "030-live"
     }
 }

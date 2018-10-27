@@ -70,6 +70,8 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
         return currentTalk
     }
 
+    fun getCurrentTalk(): TalkSession? = currentTalk
+
     /** Create directory for current dir */
     fun createCurrentTalkDir() {
         val preview = previewDir() ?: return

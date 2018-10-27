@@ -6,17 +6,17 @@
 	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
 
 	<style>
-		.stdlog { max-height: 500px }
+		.stdlog { max-height: 250px }
 	</style>
 </head>
 
 <body>
 <div layout:fragment="content">
-	<div th:replace="stepper :: stepper(step = 2)"></div>
+	<div th:replace="stepper :: stepper(step = 3)"></div>
 
 	<div class="row">
 		<div class="col-sm-1">
-			<a th:href="@{/010-talk-choice}" class="btn btn-info"><i class="fas fa-arrow-left"></i></a>
+			<a th:href="@{/020-preview}" class="btn btn-info"><i class="fas fa-arrow-left"></i></a>
 		</div>
 		<div class="col-sm-10 text-center">
 			<h2 th:text="${talk.talk}"></h2>
@@ -33,21 +33,39 @@
 
 		<div class="row mb-3" v-if="!firstRun">
 			<div class="col-sm text-center">
-				<button class="btn btn-primary btn-lg" @click="start()">Lancer le preview</button>
-			</div>
-			<div class="col-sm text-center">
-				<button class="btn btn-outline-primary btn-lg" @click="goLive()">Passer au live directement</button>
+				<button class="btn btn-primary btn-lg" @click="start()">Démarrer l'enregistrement</button>
 			</div>
 		</div>
 
 		<div class="row mb-3" v-else>
 			<div class="col-sm text-center">
-				<button class="btn btn-outline-success btn-lg" @click="start()">Relancer le preview</button>
-				<button class="btn btn-success btn-lg" @click="view()">Voir le preview</button>
+				<button class="btn btn-warning btn-lg" @click="start()">RELANCER</button>
 			</div>
 			<div class="col-sm text-center">
-				<button class="btn btn-primary btn-lg" @click="goLive()">Passer au live</button>
+				<a class="btn btn-outline-primary btn-lg" th:href="@{/010-talk-choice}">Enchainer avec un nouveau talk</a>
+				<button class="btn btn-primary btn-lg" @click="exportTalk()">Exporter le talk</button>
 			</div>
+		</div>
+
+		<div class="row mb-3" v-if="files.length > 0">
+			<table class="table">
+				<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">Fichier</th>
+					<th scope="col">Taille</th>
+					<th scope="col">Durée</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr v-for="(f, idx) in files" :class="{ 'table-active': f.selected }" @click="selectFile(f)">
+					<td>{{ idx + 1 }}</td>
+					<td>{{ f.file }}</td>
+					<td>{{ f.size }}</td>
+					<td>{{ f.duration }}</td>
+				</tr>
+				</tbody>
+			</table>
 		</div>
 
 		<div class="row mb-3" v-if="log.length > 0">
@@ -64,7 +82,11 @@
 			el: '#vue',
 			data: {
 				firstRun: false,
-				log: []
+				log: ['0 frame drop', '0 frame drop'],
+				files: [
+					{ file: 'record-2018-10-19-14_54_48_0200-f00.nut', size: '3.2Go', duration: '2h 10min 27s', selected: false },
+					{ file: 'record-2018-10-19-16_54_48_0200-f00.nut', size: '1.3Go', duration: '1h 7min 3s', selected: true }
+				]
 			},
 
 			created() {
@@ -92,20 +114,17 @@
 					})
 				},
 
+				selectFile(f) {
+					Vue.set(f, 'selected', !f.selected)
+				},
+
 				start() {
-					axios.post('/preview/start').then(() => {
+					axios.post('/live/start').then(() => {
 						this.firstRun = true
 					})
 				},
 
-				view() {
-					axios.post('/preview/view')
-				},
-
-				goLive() {
-					axios.delete('/preview').then(() => {
-						window.location = "030-live"
-					})
+				exportTalk() {
 				}
 			}
 		})
