@@ -23,6 +23,6 @@ class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessa
         val logFile = recordingDir.resolve(logDateFormater.format(LocalDateTime.now()) + "_nageru.log")
         val runDir = Paths.get(props.nageru.themeDir)
 
-        CmdRunner("Nageru", cmd, runDir, logFile, msgTpl, "/nageruOut").start()
+        CmdRunner("nageru", cmd, runDir, logFile, msgTpl, "/nageruOut").start()
     }
 }

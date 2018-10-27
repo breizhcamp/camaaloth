@@ -12,8 +12,8 @@ private val logger = KotlinLogging.logger {}
  * Command runner, can write output to file or stomp topic
  */
 class CmdRunner(private val appName: String, private val cmd: List<String>, private val runDir: Path,
-                private val logFile: Path?, private val msgTpl: SimpMessagingTemplate?, private val stompDest: String?)
-    : Thread("${appName}Runner"){
+                private val logFile: Path? = null, private val msgTpl: SimpMessagingTemplate? = null,
+                private val stompDest: String? = null) : Thread("${appName}Runner") {
 
     override fun run() {
         logger.info { "Starting ${appName} with command : [$cmd]" }

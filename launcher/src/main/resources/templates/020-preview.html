@@ -33,15 +33,20 @@
 
 		<div class="row mb-3" v-if="!firstRun">
 			<div class="col-sm text-center">
-				<button class="btn btn-primary btn-lg" @click="startNageru()">Lancer le preview</button>
+				<button class="btn btn-primary btn-lg" @click="start()">Lancer le preview</button>
+			</div>
+			<div class="col-sm text-center">
+				<button class="btn btn-outline-primary btn-lg" @click="goLive()">Passer au live directement</button>
 			</div>
 		</div>
 
 		<div class="row mb-3" v-else>
 			<div class="col-sm text-center">
-				<button class="btn btn-outline-success btn-lg" @click="startNageru()">Relancer le preview</button>
-				<button class="btn btn-success btn-lg">Voir le preview</button>
-				<button class="btn btn-primary btn-lg">Passer au live</button>
+				<button class="btn btn-outline-success btn-lg" @click="start()">Relancer le preview</button>
+				<button class="btn btn-success btn-lg" @click="view()">Voir le preview</button>
+			</div>
+			<div class="col-sm text-center">
+				<button class="btn btn-primary btn-lg" @click="goLive()">Passer au live</button>
 			</div>
 		</div>
 
@@ -87,16 +92,20 @@
 					})
 				},
 
-				startNageru() {
+				start() {
 					axios.post('/preview/start').then(() => {
 						this.firstRun = true
 					})
 				},
 
-				startVlc() {
+				view() {
+					axios.post('/preview/view')
 				},
 
 				goLive() {
+					axios.delete('/preview').then(() => {
+						window.location = "030-live"
+					})
 				}
 			}
 		})
