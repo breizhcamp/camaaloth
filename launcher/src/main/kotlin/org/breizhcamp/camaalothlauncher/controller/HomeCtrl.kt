@@ -23,6 +23,7 @@ class HomeCtrl(private val talkSrv: TalkSrv) {
     fun preview(@RequestParam file: String, model: Model) : String {
         val currentTalk = talkSrv.setCurrentTalkFromFile(file)
         talkSrv.createCurrentTalkDir()
+        talkSrv.extractImagesToThemeDir(file)
         model.addAttribute("talk", currentTalk)
         return "020-preview"
     }

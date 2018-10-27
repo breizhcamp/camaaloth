@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.breizhcamp.camaalothlauncher.CamaalothProps
 import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.springframework.stereotype.Service
+import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -25,13 +26,13 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
     var recordingPath: Path? = null
 
     /**
-     * @return the talk informations (and logo) read from the zip [file]
+     * @return the talk informations (and logo) read from the zip [zipFileName]
      */
-    fun readTalkSession(file: String, withLogo: Boolean = true) : TalkSession {
-        val zipFile = Paths.get(file)
-        if (Files.notExists(zipFile)) throw FileNotFoundException("[$file] doesn't exists")
+    fun readTalkSession(zipFileName: String, withLogo: Boolean = true) : TalkSession {
+        val zipFile = Paths.get(zipFileName)
+        if (Files.notExists(zipFile)) throw FileNotFoundException("[$zipFileName] doesn't exists")
 
-        ZipFile(file).use { zip ->
+        ZipFile(zipFileName).use { zip ->
             val entries = zip.entries()
 
             var infos: TalkSession? = null
@@ -50,7 +51,7 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
             }
 
             if (infos == null) {
-                throw FileNotFoundException("Cannot found [infos.json] in zip file [$file]")
+                throw FileNotFoundException("Cannot found [infos.json] in zip file [$zipFileName]")
             }
 
             infos.logo = logo
@@ -58,9 +59,9 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
         }
     }
 
-    /** Define current talk session after reading zip [file] */
-    fun setCurrentTalkFromFile(file: String): TalkSession? {
-        val t = readTalkSession(file, false)
+    /** Define current talk session after reading zip [zipFile] */
+    fun setCurrentTalkFromFile(zipFile: String): TalkSession? {
+        val t = readTalkSession(zipFile, false)
         currentTalk = t
 
         val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
@@ -75,6 +76,31 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
 
         if (Files.notExists(preview)) {
             Files.createDirectories(preview)
+        }
+    }
+
+    /** Extract all png in [zipFile] into themes/images dir */
+    fun extractImagesToThemeDir(zipFile: String) {
+        val imagesDir = Paths.get(props.nageru.themeDir, "images")
+        val imgDirFile = imagesDir.toFile()
+
+        if (Files.exists(imagesDir)) imgDirFile.deleteRecursively()
+        Files.createDirectories(imagesDir)
+
+        ZipFile(zipFile).use { zip ->
+            val entries = zip.entries()
+
+            while (entries.hasMoreElements()) {
+                val entry = entries.nextElement()
+
+                if (entry.name.endsWith(".png")) {
+                    zip.getInputStream(entry).use { input ->
+                        File(imgDirFile, entry.name).outputStream().use { out ->
+                            input.copyTo(out)
+                        }
+                    }
+                }
+            }
         }
     }
 
