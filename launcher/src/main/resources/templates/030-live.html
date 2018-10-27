@@ -31,23 +31,23 @@
 
 	<div id="vue">
 
-		<div class="row mb-3" v-if="!firstRun">
-			<div class="col-sm text-center">
+		<div class="row mb-3">
+			<div class="col-sm text-center" v-if="!firstRun">
 				<button class="btn btn-primary btn-lg" @click="start()">Démarrer l'enregistrement</button>
 			</div>
-		</div>
-
-		<div class="row mb-3" v-else>
-			<div class="col-sm text-center">
+			<div class="col-sm text-center" v-else>
 				<button class="btn btn-warning btn-lg" @click="start()">RELANCER</button>
 			</div>
-			<div class="col-sm text-center">
+
+
+			<div class="col-sm text-center" v-if="files.length > 0">
 				<a class="btn btn-outline-primary btn-lg" th:href="@{/010-talk-choice}">Enchainer avec un nouveau talk</a>
 				<button class="btn btn-primary btn-lg" @click="exportTalk()">Exporter le talk</button>
 			</div>
 		</div>
 
 		<div class="row mb-3" v-if="files.length > 0">
+			<h4>Selectionnez les fichiers à exporter :</h4>
 			<table class="table">
 				<thead>
 				<tr>
