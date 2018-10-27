@@ -18,6 +18,8 @@ private val logger = KotlinLogging.logger {}
 @Service
 class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessagingTemplate) {
     private val logDateFormater = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
+    /** STOMP topic for nageru log */
+    private val stompDest = "/nageruOut"
 
     fun start(recordingDir: Path) {
         NageruRunner(recordingDir).start()
@@ -38,7 +40,10 @@ class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessa
 
             ReadStream(nageru.inputStream, "NageruStdoutReader", recordingDir).start()
             val waitFor = nageru.waitFor()
-            logger.info { "Nageru stopped and returned [$waitFor]" }
+
+            val exitLog = "Nageru stopped and returned [$waitFor]"
+            logger.info { exitLog }
+            msgTpl.convertAndSend(stompDest, exitLog)
         }
     }
 
@@ -46,8 +51,7 @@ class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessa
     private inner class ReadStream(private val inputStream: InputStream, name: String, private val recordingDir: Path) : Thread(name) {
 
         override fun run() {
-            val dest = "/nageruOut"
-            msgTpl.convertAndSend(dest, "---- NEW STREAM ----")
+            msgTpl.convertAndSend(stompDest, "---- NEW STREAM ----")
 
             val logfile = recordingDir.resolve(logDateFormater.format(LocalDateTime.now()) + "_nageru.log").toFile()
 
@@ -55,7 +59,7 @@ class NageruSrv(private val props: CamaalothProps, private val msgTpl: SimpMessa
 
                 inputStream.bufferedReader().forEachLine { line ->
                     logger.debug { "Nageru stdout : $line" }
-                    msgTpl.convertAndSend(dest, line)
+                    msgTpl.convertAndSend(stompDest, line)
                     writer.appendln(line)
                     writer.flush()
                 }
