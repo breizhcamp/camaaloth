@@ -13,6 +13,7 @@ class CamaalothProps {
 
     class Nageru {
         lateinit var startScript: String
+        lateinit var themeDir: String
     }
 
 }

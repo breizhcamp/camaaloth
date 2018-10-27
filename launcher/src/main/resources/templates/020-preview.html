@@ -2,7 +2,12 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	  layout:decorate="~{layout}">
 <head>
+	<script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
+	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
 
+	<style>
+		.stdlog { max-height: 500px }
+	</style>
 </head>
 
 <body>
@@ -24,54 +29,78 @@
 		</div>
 	</div>
 
-	<div class="row mb-3">
-		<div class="col-sm text-center">
-			<button class="btn btn-primary btn-lg">Lancer le preview</button>
+	<div id="vue">
+
+		<div class="row mb-3" v-if="!firstRun">
+			<div class="col-sm text-center">
+				<button class="btn btn-primary btn-lg" @click="startNageru()">Lancer le preview</button>
+			</div>
+		</div>
+
+		<div class="row mb-3" v-else>
+			<div class="col-sm text-center">
+				<button class="btn btn-outline-success btn-lg" @click="startNageru()">Relancer le preview</button>
+				<button class="btn btn-success btn-lg">Voir le preview</button>
+				<button class="btn btn-primary btn-lg">Passer au live</button>
+			</div>
+		</div>
+
+		<div class="row mb-3">
+			<div class="col-sm-12">
+				<pre class="pre-scrollable stdlog" ref="log">
+{{log.join('\n')}}
+				</pre>
+			</div>
 		</div>
 	</div>
 
-	<div class="row mb-3">
-		<div class="col-sm text-center">
-			<button class="btn btn-outline-success btn-lg">Relancer le preview</button>
-			<button class="btn btn-success btn-lg">Voir le preview</button>
-			<button class="btn btn-primary btn-lg">Passer au live</button>
-		</div>
-	</div>
+	<script>
+		new Vue({
+			el: '#vue',
+			data: {
+				firstRun: false,
+				log: []
+			},
 
-	<div class="row mb-3">
-		<div class="col-sm-12">
-			<pre class="pre-scrollable" style="max-height: 500px">
-Starting nagueru
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-0 frames drop
-			</pre>
-		</div>
-	</div>
+			created() {
+				this.connectToWS()
+			},
+
+			methods: {
+				connectToWS() {
+					ws.sub('/nageruOut', msg => {
+						let body = msg.body
+						if (body === '---- NEW STREAM ----') {
+							this.log = []
+						}
+
+						this.log.push(body)
+
+						//limit number of lines
+						if (this.log.length > 100) {
+							this.log.splice(0, this.log.length - 100)
+						}
+
+						//scroll log at bottom
+						let log = this.$refs.log;
+						log.scrollTop = log.scrollHeight;
+					})
+				},
+
+				startNageru() {
+					axios.post('/preview/start').then(() => {
+						this.firstRun = true
+					})
+				},
+
+				startVlc() {
+				},
+
+				goLive() {
+				}
+			}
+		})
+	</script>
 
 </div>
 </body>

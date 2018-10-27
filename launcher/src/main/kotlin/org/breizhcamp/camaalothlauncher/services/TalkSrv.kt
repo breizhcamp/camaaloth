@@ -6,6 +6,7 @@ import org.breizhcamp.camaalothlauncher.dto.TalkSession
 import org.springframework.stereotype.Service
 import java.io.FileNotFoundException
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.util.zip.ZipEntry
@@ -17,7 +18,11 @@ import java.util.zip.ZipFile
 @Service
 class TalkSrv(private val objectMapper: ObjectMapper, private val props: CamaalothProps) {
 
-    var currentTalk: TalkSession? = null
+    /** Selected user talk read from JSON file */
+    private var currentTalk: TalkSession? = null
+
+    /** Path designing recording dir for [currentTalk] */
+    var recordingPath: Path? = null
 
     /**
      * @return the talk informations (and logo) read from the zip [file]
@@ -55,21 +60,25 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
 
     /** Define current talk session after reading zip [file] */
     fun setCurrentTalkFromFile(file: String): TalkSession? {
-        currentTalk = readTalkSession(file, false)
+        val t = readTalkSession(file, false)
+        currentTalk = t
+
+        val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
+        recordingPath = Paths.get(props.recordingDir, dirName.replace('/', '-'))
+
         return currentTalk
     }
 
     /** Create directory for current dir */
     fun createCurrentTalkDir() {
-        val t = currentTalk ?: return
+        val preview = previewDir() ?: return
 
-        val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
-        val dir = Paths.get(props.recordingDir, dirName.replace('/', '-'))
-
-        if (Files.notExists(dir)) {
-            Files.createDirectories(dir)
+        if (Files.notExists(preview)) {
+            Files.createDirectories(preview)
         }
     }
+
+    fun previewDir() = recordingPath?.resolve("preview")
 
     private fun convertToTalk(zip: ZipFile, entry: ZipEntry?): TalkSession {
         zip.getInputStream(entry).use {
