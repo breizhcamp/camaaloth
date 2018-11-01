@@ -7,6 +7,7 @@ import org.breizhcamp.camaalothlauncher.dto.LsblkDto
 import org.breizhcamp.camaalothlauncher.dto.Partition
 import org.springframework.stereotype.Service
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.stream.Collectors
 
@@ -47,11 +48,23 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
         val res = ArrayList<FileMeta>()
 
         for (partition in partitions) {
-            Files.newDirectoryStream(Paths.get(partition.mountpoint), pattern).use { stream ->
-                stream.forEach {
-                    res.add(FileMeta(it.fileName.toString(), it.parent.toString(),
-                            Files.getLastModifiedTime(it).toInstant(), partition))
-                }
+            val path = Paths.get(partition.mountpoint)
+            res.addAll(listFiles(path, pattern, partition))
+        }
+
+        return res
+    }
+
+    /**
+     * @return files matching the [pattern] in [path]
+     */
+    fun listFiles(path: Path?, pattern: String, partition: Partition?): ArrayList<FileMeta> {
+        val res = ArrayList<FileMeta>()
+
+        Files.newDirectoryStream(path, pattern).use { stream ->
+            stream.forEach {
+                res.add(FileMeta(it.fileName.toString(), it.parent.toString(),
+                        Files.getLastModifiedTime(it).toInstant(), partition, Files.size(it)))
             }
         }
 

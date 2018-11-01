@@ -4,6 +4,7 @@
 <head>
 	<script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
 	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
+	<script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
 
 	<style>
 		.stdlog { max-height: 300px }
@@ -60,8 +61,8 @@
 				<tbody>
 				<tr v-for="(f, idx) in files" :class="{ 'table-active': f.selected }" @click="selectFile(f)">
 					<td>{{ idx + 1 }}</td>
-					<td>{{ f.file }}</td>
-					<td>{{ f.size }}</td>
+					<td>{{ f.name }}</td>
+					<td>{{ f.size | formatBytes }}</td>
 					<td>{{ f.duration }}</td>
 				</tr>
 				</tbody>
@@ -83,13 +84,11 @@
 			data: {
 				firstRun: false,
 				log: [],
-				files: [
-					{ file: 'record-2018-10-19-14_54_48_0200-f00.nut', size: '3.2Go', duration: '2h 10min 27s', selected: false },
-					{ file: 'record-2018-10-19-16_54_48_0200-f00.nut', size: '1.3Go', duration: '1h 7min 3s', selected: true }
-				]
+				files: []
 			},
 
 			created() {
+				this.loadFiles()
 				this.connectToWS()
 			},
 
@@ -125,6 +124,43 @@
 				},
 
 				exportTalk() {
+				},
+
+
+				loadFiles() {
+					axios.get('/live/files').then(res => {
+						this.updateFiles(res.data)
+					})
+				},
+
+				updateFiles(newFiles) {
+					this.files = updateOnlyNewFiles(this.files, newFiles, this.updateFile)
+					this.files.sort((f1, f2) => { return f1.name < f2.name ? -1 : f1.name > f2.name })
+					setTimeout(() => this.loadFiles(), 5000)
+				},
+
+				updateFile(file, newFile) {
+					if (newFile) {
+						Vue.set(file, 'lastModified', newFile.lastModified)
+					} else {
+						file.selected = true //selected by default
+					}
+
+					// axios.get('/live/duration', { params: { file: file.path + '/' + file.name }}).then(res => {
+					// 	Vue.set(file, 'duration', res.data)
+					// })
+				},
+
+			},
+
+			filters: {
+				formatBytes (bytes, decimals) {
+					if (bytes === 0) return '0 o';
+					var k = 1024,
+						dm = decimals <= 0 ? 0 : decimals || 1,
+						sizes = ['o', 'Ko', 'Mo', 'Go', 'To', 'Po', 'Eo', 'Zo', 'Yo'],
+						i = Math.floor(Math.log(bytes) / Math.log(k));
+					return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 				}
 			}
 		})

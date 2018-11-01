@@ -6,6 +6,7 @@
 	<script src="/webjars/moment/2.22.2/min/moment-with-locales.min.js"></script>
 	<script src="/webjars/vue-moment/4.0.0/dist/vue-moment.min.js"></script>
 	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
+	<script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
 
 	<style>
 		#cards li {
@@ -75,40 +76,20 @@
 			methods: {
 				loadFiles() {
 					axios.get('/files').then(res => {
-						this.updateTalks(res.data)
+						this.updateFiles(res.data)
 					})
 				},
 
-				updateTalks(newFiles) {
-					//update existing files
-					for (let file of this.files) {
-						let newFile = newFiles.find(f => f.name === file.name && f.path === file.path);
-
-						if (newFile) {
-							newFile.processed = true
-							if (file.lastModified !== newFile.lastModified) {
-								Vue.set(file, 'lastModified', newFile.lastModified)
-								this.updateTalk(file)
-							}
-
-						} else {
-							file.delete = true
-						}
-					}
-
-					//remove file
-					this.files = this.files.filter(f => !f.delete)
-
-					//add new files
-					newFiles.filter(f => !f.processed).forEach(f => {
-						this.files.push(f)
-						this.updateTalk(f)
-					})
-
+				updateFiles(newFiles) {
+					this.files = updateOnlyNewFiles(this.files, newFiles, this.updateFile)
 					setTimeout(() => this.loadFiles(), 1000)
 				},
 
-				updateTalk(file) {
+				updateFile(file, newFile) {
+					if (newFile) {
+						Vue.set(file, 'lastModified', newFile.lastModified)
+					}
+
 					axios.get('/files/talk', { params: { file: file.path + '/' + file.name }}).then(res => {
 						Vue.set(file, 'talk', res.data)
 					})

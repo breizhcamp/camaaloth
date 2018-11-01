@@ -9,5 +9,6 @@ data class FileMeta (
         val name: String,
         val path: String,
         val lastModified: Instant,
-        val partition: Partition
+        val partition: Partition?,
+        val size: Long
 )
