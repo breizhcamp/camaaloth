@@ -6,6 +6,8 @@ import org.breizhcamp.camaalothlauncher.services.NageruSrv
 import org.breizhcamp.camaalothlauncher.services.TalkSrv
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.web.bind.annotation.*
+import java.nio.file.Paths
+import java.time.Duration
 
 /**
  * Handle method for 030-live
@@ -23,6 +25,11 @@ class LiveCtrl(private val talkSrv: TalkSrv, private val nageruSrv: NageruSrv, p
     fun listFiles() : List<FileMeta> {
         val recordingDir = talkSrv.recordingPath ?: return emptyList()
         return filesSrv.listFiles(recordingDir, "*.nut", null)
+    }
+
+    @GetMapping("/duration")
+    fun duration(@RequestParam file: String) : Duration {
+        return filesSrv.fileDuration(Paths.get(file))
     }
 
 }

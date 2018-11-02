@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.time.Duration
 
 private val logger = KotlinLogging.logger {}
 
@@ -65,5 +66,20 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
         }
 
         return res
+    }
+
+    /**
+     * @return duration of the video [file]
+     */
+    fun fileDuration(file: Path) : Duration {
+        //ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -sexagesimal file:record-2018-11-02-16:16:51+0100-f00.nut
+        val cmd = listOf("ffprobe", "-v", "fatal", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1",
+                "file:${file.fileName}")
+
+        val dur = ShortCmdRunner("ffprobe length", cmd, true, file.parent).run() //10.030000
+
+        if (dur == "N/A") return Duration.ZERO
+        val split = dur.split(".")
+        return Duration.ofSeconds(split[0].toLong(), split[1].toLong() * 1000)
     }
 }

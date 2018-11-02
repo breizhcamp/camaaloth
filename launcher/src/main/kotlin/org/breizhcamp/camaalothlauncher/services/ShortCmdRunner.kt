@@ -13,7 +13,7 @@ class ShortCmdRunner(private val appName: String, private val cmd: List<String>,
                      private val runDir: Path? = null) {
 
     fun run() : String {
-        if (logging) logger.info { "Starting ${appName} with command : [$cmd]" }
+        if (logging) logger.info { "Starting [${appName}] with command : $cmd" }
 
         val processB = ProcessBuilder(cmd).redirectErrorStream(true)
         runDir?.let { processB.directory(it.toFile()) }

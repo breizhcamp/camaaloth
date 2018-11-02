@@ -162,9 +162,9 @@
 						file.selected = true //selected by default
 					}
 
-					// axios.get('/live/duration', { params: { file: file.path + '/' + file.name }}).then(res => {
-					// 	Vue.set(file, 'duration', res.data)
-					// })
+					axios.get('/live/duration', { params: { file: file.path + '/' + file.name }}).then(res => {
+						Vue.set(file, 'duration', res.data)
+					})
 				},
 
 			},
