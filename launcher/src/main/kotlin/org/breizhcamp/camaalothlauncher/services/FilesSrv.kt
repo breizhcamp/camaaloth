@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.stream.Collectors
 
 private val logger = KotlinLogging.logger {}
 
@@ -23,10 +22,7 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
     fun readPartitions(): List<Partition> {
         //lsblk -o NAME,MOUNTPOINT,VENDOR,LABEL,MODEL,HOTPLUG,SIZE -J
         val cmd = listOf("lsblk", "-o", "NAME,MOUNTPOINT,VENDOR,LABEL,MODEL,HOTPLUG,SIZE", "-J")
-        logger.info { "Retrieving partitions with command : [$cmd]" }
-        val lsblk = ProcessBuilder(cmd).redirectErrorStream(true).start() //TODO better handling error
-
-        val jsonLsblk = lsblk.inputStream.bufferedReader().lines().collect(Collectors.joining())
+        val jsonLsblk = ShortCmdRunner("lsblk partitions", cmd, true).run()
         val devices = objectMapper.readValue(jsonLsblk, LsblkDto::class.java)
 
         val partitions = ArrayList<Partition>()
