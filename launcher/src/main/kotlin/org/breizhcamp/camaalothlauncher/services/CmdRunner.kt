@@ -41,6 +41,8 @@ class CmdRunner(private val appName: String, private val cmd: List<String>, priv
             } else {
                 readInput(null)
             }
+
+            sendMsg(msgTpl, stompDest, "---- END STREAM ----")
         }
 
         private fun readInput(writer: BufferedWriter?) {

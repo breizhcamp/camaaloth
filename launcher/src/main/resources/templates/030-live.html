@@ -83,8 +83,10 @@
 			el: '#vue',
 			data: {
 				firstRun: false,
+				nageruRunning: false,
 				log: [],
-				files: []
+				files: [],
+				timeout: null
 			},
 
 			created() {
@@ -98,6 +100,12 @@
 						let body = msg.body
 						if (body === '---- NEW STREAM ----') {
 							this.log = []
+							this.nageruRunning = true;
+							this.loadFiles();
+
+						} else if (body === '---- END STREAM ----') {
+							this.nageruRunning = false;
+							this.loadFiles();
 						}
 
 						this.log.push(body)
@@ -109,7 +117,7 @@
 
 						//scroll log at bottom
 						let log = this.$refs.logPre;
-						log.scrollTop = log.scrollHeight;
+						if (log) log.scrollTop = log.scrollHeight;
 					})
 				},
 
@@ -128,6 +136,11 @@
 
 
 				loadFiles() {
+					if (this.timeout) {
+						clearTimeout(this.timeout)
+						this.timeout = null
+					}
+
 					axios.get('/live/files').then(res => {
 						this.updateFiles(res.data)
 					})
@@ -136,7 +149,10 @@
 				updateFiles(newFiles) {
 					this.files = updateOnlyNewFiles(this.files, newFiles, this.updateFile)
 					this.files.sort((f1, f2) => { return f1.name < f2.name ? -1 : f1.name > f2.name })
-					setTimeout(() => this.loadFiles(), 5000)
+
+					if (this.nageruRunning) {
+						this.timeout = setTimeout(() => this.loadFiles(), 10000)
+					}
 				},
 
 				updateFile(file, newFile) {
