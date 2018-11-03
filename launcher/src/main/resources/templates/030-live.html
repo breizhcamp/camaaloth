@@ -3,6 +3,9 @@
 	  layout:decorate="~{layout}">
 <head>
 	<script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
+	<script src="/webjars/moment/2.22.2/min/moment-with-locales.min.js"></script>
+	<script src="/webjars/vue-moment/4.0.0/dist/vue-moment.min.js"></script>
+	<script src="/webjars/moment-duration-format/2.2.2/lib/moment-duration-format.js"></script>
 	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
 	<script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
 
@@ -63,7 +66,7 @@
 					<td>{{ idx + 1 }}</td>
 					<td>{{ f.name }}</td>
 					<td>{{ f.size | formatBytes }}</td>
-					<td>{{ f.duration }}</td>
+					<td>{{ f.duration | duration().format('h [h] m [min] s [s]') }}</td>
 				</tr>
 				</tbody>
 			</table>
@@ -79,6 +82,8 @@
 	</div>
 
 	<script>
+		moment.locale('fr')
+		Vue.use(vueMoment, { moment })
 		new Vue({
 			el: '#vue',
 			data: {

@@ -60,6 +60,7 @@ dependencies {
 	compile('org.webjars.npm:vue:2.5.17')
 	compile('org.webjars.npm:axios:0.18.0')
 	compile('org.webjars.npm:vue-moment:4.0.0')
+	compile('org.webjars.npm:moment-duration-format:2.2.2')
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
