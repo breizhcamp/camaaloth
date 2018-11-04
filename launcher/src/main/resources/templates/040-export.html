@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout}">
+<head>
+	<script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
+	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
+	<script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
+
+	<style>
+		.stdlog { max-height: 300px }
+	</style>
+</head>
+
+<body>
+<div layout:fragment="content">
+	<div th:replace="stepper :: stepper(step = 4)"></div>
+
+	<div class="row">
+		<div class="col-sm-1">
+			<a th:href="@{/030-live}" class="btn btn-info"><i class="fas fa-arrow-left"></i></a>
+		</div>
+		<div class="col-sm-10 text-center">
+			<h2 th:text="${talk.talk}"></h2>
+			<p class="text-muted font-italic">
+				<span th:each="s : ${talk.speakers}">
+					<span th:if="${!sStat.first}"> - </span>
+					<span th:text="${s.name}">John Snow</span>
+				</span>
+			</p>
+		</div>
+	</div>
+
+	<div id="vue">
+
+
+
+		<div class="row mb-3" v-if="log.length > 0">
+			<div class="col-sm-12">
+				<pre class="pre-scrollable stdlog" ref="logPre">
+{{log.join('\n')}}
+				</pre>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		new Vue({
+			el: '#vue',
+			data: {
+				log: [],
+				ffmpegRunning: false
+			},
+
+			created() {
+				this.connectToWS()
+			},
+
+			methods: {
+				connectToWS() {
+					ws.onConnect(() => {
+						console.log("On connexion")
+
+					}).sub('/040-ffmpeg-export-out', msg => {
+						let body = msg.body
+						if (body === '---- NEW STREAM ----') {
+							this.log = []
+							this.ffmpegRunning = true;
+
+						} else if (body === '---- END STREAM ----') {
+							this.ffmpegRunning = false;
+						}
+
+						this.log.push(body)
+
+						//limit number of lines
+						if (this.log.length > 100) {
+							this.log.splice(0, this.log.length - 100)
+						}
+
+						//scroll log at bottom
+						let log = this.$refs.logPre;
+						if (log) log.scrollTop = log.scrollHeight;
+
+					}).sub('/040-ffmpeg-export-progress', msg => {
+						console.log(msg)
+					})
+				},
+			}
+		})
+	</script>
+
+</div>
+</body>
+</html>

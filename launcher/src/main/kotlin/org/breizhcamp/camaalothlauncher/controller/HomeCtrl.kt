@@ -42,4 +42,12 @@ class HomeCtrl(private val talkSrv: TalkSrv) {
         model.addAttribute("talk", talk)
         return "030-live"
     }
+
+    @GetMapping("/040-export")
+    fun export(model: Model) : String {
+        val talk = talkSrv.getCurrentTalk() ?: return "redirect:010-talk-choice"
+
+        model.addAttribute("talk", talk)
+        return "040-export"
+    }
 }
