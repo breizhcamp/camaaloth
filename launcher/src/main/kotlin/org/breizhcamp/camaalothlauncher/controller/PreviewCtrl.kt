@@ -17,7 +17,7 @@ class PreviewCtrl(private val talkSrv: TalkSrv, private val nageruSrv: NageruSrv
     fun startNageru() {
         val preview = talkSrv.previewDir() ?: return
         clearPreviewDir()
-        nageruSrv.start(preview)
+        nageruSrv.start(preview, "/020-nageru-preview-out")
     }
 
     @PostMapping("/view") @ResponseStatus(NO_CONTENT)

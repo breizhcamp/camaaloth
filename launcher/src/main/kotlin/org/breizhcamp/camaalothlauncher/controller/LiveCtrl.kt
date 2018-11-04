@@ -18,7 +18,7 @@ class LiveCtrl(private val talkSrv: TalkSrv, private val nageruSrv: NageruSrv, p
     @PostMapping("/start") @ResponseStatus(NO_CONTENT)
     fun startNageru() {
         val recordingDir = talkSrv.recordingPath ?: return
-        nageruSrv.start(recordingDir)
+        nageruSrv.start(recordingDir, "/030-nageru-live-out")
     }
 
     @GetMapping("/files")

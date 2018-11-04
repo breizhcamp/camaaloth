@@ -73,7 +73,7 @@
 
 			methods: {
 				connectToWS() {
-					ws.sub('/nageruOut', msg => {
+					ws.sub('/020-nageru-preview-out', msg => {
 						let body = msg.body
 						if (body === '---- NEW STREAM ----') {
 							this.log = []

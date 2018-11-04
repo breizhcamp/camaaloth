@@ -101,7 +101,7 @@
 
 			methods: {
 				connectToWS() {
-					ws.sub('/nageruOut', msg => {
+					ws.sub('/030-nageru-live-out', msg => {
 						let body = msg.body
 						if (body === '---- NEW STREAM ----') {
 							this.log = []
