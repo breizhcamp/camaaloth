@@ -137,6 +137,14 @@
 				},
 
 				exportTalk() {
+					let files = this.files.filter(f => f.selected).map(f => f.name)
+					axios.post('/live/export', files).then((res) => {
+						if (res.status === 204) {
+							window.location = '040-export'
+						} else {
+							alert(res.data)
+						}
+					})
 				},
 
 

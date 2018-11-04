@@ -1,6 +1,7 @@
 package org.breizhcamp.camaalothlauncher.controller
 
 import org.breizhcamp.camaalothlauncher.dto.FileMeta
+import org.breizhcamp.camaalothlauncher.services.ConvertSrv
 import org.breizhcamp.camaalothlauncher.services.FilesSrv
 import org.breizhcamp.camaalothlauncher.services.NageruSrv
 import org.breizhcamp.camaalothlauncher.services.TalkSrv
@@ -13,11 +14,12 @@ import java.time.Duration
  * Handle method for 030-live
  */
 @RestController @RequestMapping("/live")
-class LiveCtrl(private val talkSrv: TalkSrv, private val nageruSrv: NageruSrv, private val filesSrv: FilesSrv) {
+class LiveCtrl(private val talkSrv: TalkSrv, private val nageruSrv: NageruSrv, private val filesSrv: FilesSrv,
+               private val convertSrv: ConvertSrv) {
 
     @PostMapping("/start") @ResponseStatus(NO_CONTENT)
     fun startNageru() {
-        val recordingDir = talkSrv.recordingPath ?: return
+        val recordingDir = talkSrv.recordingPath ?: throw IllegalStateException("Current talk not set")
         nageruSrv.start(recordingDir, "/030-nageru-live-out")
     }
 
@@ -32,4 +34,10 @@ class LiveCtrl(private val talkSrv: TalkSrv, private val nageruSrv: NageruSrv, p
         return filesSrv.fileDuration(Paths.get(file))
     }
 
+    @PostMapping("/export") @ResponseStatus(NO_CONTENT)
+    fun export(@RequestBody files: List<String>) {
+        val recordingDir = talkSrv.recordingPath ?: throw IllegalStateException("Current talk not set")
+
+        convertSrv.setFiles(files.map { recordingDir.resolve(it) })
+    }
 }
