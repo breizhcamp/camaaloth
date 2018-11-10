@@ -1,6 +1,6 @@
 package org.breizhcamp.camaalothlauncher.controller
 
-import org.breizhcamp.camaalothlauncher.services.CmdRunner
+import org.breizhcamp.camaalothlauncher.services.LongCmdRunner
 import org.breizhcamp.camaalothlauncher.services.NageruSrv
 import org.breizhcamp.camaalothlauncher.services.TalkSrv
 import org.springframework.http.HttpStatus.NO_CONTENT
@@ -28,7 +28,7 @@ class PreviewCtrl(private val talkSrv: TalkSrv, private val nageruSrv: NageruSrv
             .use { it.firstOrNull() }
             ?.let { nutFile ->
                 val cmd = listOf("vlc", nutFile.toAbsolutePath().toString())
-                CmdRunner("vlc", cmd, preview).start()
+                LongCmdRunner("vlc", cmd, preview).start()
             }
     }
 

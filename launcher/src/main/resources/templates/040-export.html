@@ -7,7 +7,7 @@
 	<script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
 
 	<style>
-		.stdlog { max-height: 300px }
+		.stdlog { max-height: 400px }
 	</style>
 </head>
 
@@ -58,7 +58,7 @@
 			methods: {
 				connectToWS() {
 					ws.onConnect(() => {
-						console.log("On connexion")
+						axios.post('/export/start')
 
 					}).sub('/040-ffmpeg-export-out', msg => {
 						let body = msg.body

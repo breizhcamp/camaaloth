@@ -27,7 +27,7 @@ class FilesSrv(private val objectMapper: ObjectMapper) {
         val devices = objectMapper.readValue(jsonLsblk, LsblkDto::class.java)
 
         val partitions = ArrayList<Partition>()
-        for (device in devices.blockdevices.filter { it.hotplug == "1" && it.children != null }) {
+        for (device in devices.blockdevices.filter { (it.hotplug == "1" || it.hotplug == "true") && it.children != null }) {
             for (child in device.children!!) {
                 if (child.mountpoint != null) {
                     partitions.add(Partition(child.mountpoint, child.name, child.label, device.model?.trim(), device.vendor?.trim(), child.size))
