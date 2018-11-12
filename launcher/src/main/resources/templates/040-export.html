@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorate="~{layout}">
+	  layout:decorate="~{layout}" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 <head>
 	<script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
 	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
@@ -8,6 +8,10 @@
 
 	<style>
 		.stdlog { max-height: 400px }
+		.pgbar {
+			height: 40px;
+			font-size: 25px;
+		}
 	</style>
 </head>
 
@@ -31,7 +35,20 @@
 	</div>
 
 	<div id="vue">
+		<div class="row mb-3">
+			<div class="col-md-12">
+				<h4 v-if="ffmpegRunning">Export en cours...</h4>
+				<h4 v-if="!ffmpegRunning && progress < 100">Export en attente...</h4>
+				<h4 v-if="!ffmpegRunning && progress == 100">Export terminé</h4>
 
+				<div class="progress pgbar">
+					<div class="progress-bar" role="progressbar"
+						 v-bind:class="progressBarStyle" v-bind:style="{ width: progress + '%' }" >
+						{{progress}}%
+					</div>
+				</div>
+			</div>
+		</div>
 
 
 		<div class="row mb-3" v-if="log.length > 0">
@@ -48,11 +65,23 @@
 			el: '#vue',
 			data: {
 				log: [],
-				ffmpegRunning: false
+				ffmpegRunning: false,
+				progress: 10
 			},
 
 			created() {
 				this.connectToWS()
+			},
+
+			computed: {
+				progressBarStyle() {
+					return {
+						'progress-bar-animated': this.ffmpegRunning,
+						'progress-bar-striped': this.ffmpegRunning,
+						'bg-info': !this.ffmpegRunning && this.progress < 100,
+						'bg-success': !this.ffmpegRunning && this.progress === 100
+					}
+				}
 			},
 
 			methods: {
@@ -64,10 +93,10 @@
 						let body = msg.body
 						if (body === '---- NEW STREAM ----') {
 							this.log = []
-							this.ffmpegRunning = true;
+							this.ffmpegRunning = true
 
 						} else if (body === '---- END STREAM ----') {
-							this.ffmpegRunning = false;
+							this.ffmpegRunning = false
 						}
 
 						this.log.push(body)
@@ -78,8 +107,8 @@
 						}
 
 						//scroll log at bottom
-						let log = this.$refs.logPre;
-						if (log) log.scrollTop = log.scrollHeight;
+						let log = this.$refs.logPre
+						if (log) log.scrollTop = log.scrollHeight
 
 					}).sub('/040-ffmpeg-export-progress', msg => {
 						console.log(msg)

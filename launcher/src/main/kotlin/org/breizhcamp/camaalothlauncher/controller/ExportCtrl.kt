@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.io.InputStream
 
 /**
  * Controller for 040-export
@@ -18,4 +19,11 @@ class ExportCtrl(private val convertSrv: ConvertSrv) {
         convertSrv.startConvert()
     }
 
+    /**
+     * Retrieve progress sent by ffmpeg during conversion.
+     */
+    @PostMapping("/progress")
+    fun progress(input: InputStream) {
+        convertSrv.progress(input)
+    }
 }
