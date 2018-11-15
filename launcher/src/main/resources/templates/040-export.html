@@ -3,6 +3,8 @@
 	  layout:decorate="~{layout}" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 <head>
 	<script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
+	<script src="/webjars/moment/2.22.2/min/moment-with-locales.min.js"></script>
+	<script src="/webjars/moment-duration-format/2.2.2/lib/moment-duration-format.js"></script>
 	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
 	<script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
 
@@ -66,7 +68,8 @@
 			data: {
 				log: [],
 				ffmpegRunning: false,
-				progress: 10
+				progress: 10,
+				duration: null
 			},
 
 			created() {
@@ -87,7 +90,10 @@
 			methods: {
 				connectToWS() {
 					ws.onConnect(() => {
-						axios.post('/export/start')
+						axios.post('/export/start').then(res => {
+							this.duration = moment.duration(res.data).asMilliseconds()
+							console.log(this.duration)
+						})
 
 					}).sub('/040-ffmpeg-export-out', msg => {
 						let body = msg.body

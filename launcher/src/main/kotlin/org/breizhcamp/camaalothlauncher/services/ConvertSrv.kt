@@ -1,5 +1,7 @@
 package org.breizhcamp.camaalothlauncher.services
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import org.breizhcamp.camaalothlauncher.dto.FFMpegProgress
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent
 import org.springframework.context.ApplicationListener
@@ -7,6 +9,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.nio.file.Path
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -14,7 +17,9 @@ import java.time.format.DateTimeFormatter
  * Convert output files from nageru to MP4
  */
 @Service
-class ConvertSrv(private val talkSrv: TalkSrv, private val msgTpl: SimpMessagingTemplate) : ApplicationListener<ServletWebServerInitializedEvent> {
+class ConvertSrv(private val talkSrv: TalkSrv, private val msgTpl: SimpMessagingTemplate, private val filesSrv: FilesSrv)
+    : ApplicationListener<ServletWebServerInitializedEvent> {
+
     private val logDateFormater = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
 
     private var filesToConvert: List<Path> = emptyList()
@@ -31,9 +36,10 @@ class ConvertSrv(private val talkSrv: TalkSrv, private val msgTpl: SimpMessaging
     /**
      * Start conversion for selected files
      */
-    fun startConvert() {
-        val recordingPath = talkSrv.recordingPath ?: return
-        if (filesToConvert.isEmpty()) return
+    fun startConvert() : Duration {
+        val recordingPath = talkSrv.recordingPath ?: return Duration.ZERO
+        if (filesToConvert.isEmpty()) return Duration.ZERO
+        val duration = videoFileLength(filesToConvert)
 
         val inputArgs = if (filesToConvert.size == 1) {
             listOf("-i", "file:${filesToConvert[0]}")
@@ -49,6 +55,8 @@ class ConvertSrv(private val talkSrv: TalkSrv, private val msgTpl: SimpMessaging
 
         val logFile = recordingPath.resolve(logDateFormater.format(LocalDateTime.now()) + "_ffmpeg.log")
         LongCmdRunner("ffmpeg", cmd, recordingPath, logFile, msgTpl, "/040-ffmpeg-export-out").start()
+
+        return duration
     }
 
     /**
@@ -69,5 +77,16 @@ class ConvertSrv(private val talkSrv: TalkSrv, private val msgTpl: SimpMessaging
                 }
             }
         }
+    }
+
+    /**
+     * Compute the length of several video files
+     */
+    private fun videoFileLength(files: List<Path>) : Duration = runBlocking {
+        val defered = files.map { f ->
+            async { filesSrv.fileDuration(f) }
+        }
+
+        defered.fold(Duration.ZERO) { acc, d -> acc + d.await() }
     }
 }
