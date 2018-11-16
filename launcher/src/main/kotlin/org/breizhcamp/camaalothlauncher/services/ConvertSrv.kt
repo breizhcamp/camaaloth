@@ -3,16 +3,20 @@ package org.breizhcamp.camaalothlauncher.services
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import mu.KotlinLogging
 import org.breizhcamp.camaalothlauncher.dto.FFMpegProgress
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import java.io.InputStream
+import java.io.UncheckedIOException
 import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Convert output files from nageru to MP4
@@ -67,15 +71,20 @@ class ConvertSrv(private val talkSrv: TalkSrv, private val msgTpl: SimpMessaging
         input.bufferedReader().use { r ->
             val curMsg = HashMap<String, String>()
 
-            for (line in r.lines()) {
-                val (key, value) = line.split('=')
-                curMsg.put(key, value)
+            try {
+                for (line in r.lines()) {
+                    val (key, value) = line.split('=')
+                    curMsg.put(key, value)
 
-                if (line.startsWith("progress=") && curMsg.size > 0) {
-                    val progress = FFMpegProgress.build(curMsg)
-                    println(progress)
-                    curMsg.clear()
+                    if (line.startsWith("progress=") && curMsg.size > 0) {
+                        val progress = FFMpegProgress.build(curMsg)
+                        msgTpl.convertAndSend("/040-ffmpeg-export-progress", progress)
+                        curMsg.clear()
+                    }
                 }
+            } catch (e: UncheckedIOException) {
+                //ffmpeg cut the connection violently, we discard the exception
+                logger.info { "FFMpeg has cut the progress \"a l'arrache\"" }
             }
         }
     }

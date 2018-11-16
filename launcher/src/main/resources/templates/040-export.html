@@ -68,8 +68,8 @@
 			data: {
 				log: [],
 				ffmpegRunning: false,
-				progress: 10,
-				duration: null
+				progress: 0,
+				duration: 100
 			},
 
 			created() {
@@ -92,7 +92,6 @@
 					ws.onConnect(() => {
 						axios.post('/export/start').then(res => {
 							this.duration = moment.duration(res.data).asMilliseconds()
-							console.log(this.duration)
 						})
 
 					}).sub('/040-ffmpeg-export-out', msg => {
@@ -103,6 +102,9 @@
 
 						} else if (body === '---- END STREAM ----') {
 							this.ffmpegRunning = false
+
+						} else if (body === 'ffmpeg stopped and returned [0]') {
+							this.progress = 100
 						}
 
 						this.log.push(body)
@@ -117,7 +119,8 @@
 						if (log) log.scrollTop = log.scrollHeight
 
 					}).sub('/040-ffmpeg-export-progress', msg => {
-						console.log(msg)
+						let progress = JSON.parse(msg.body)
+						this.progress = Math.round(progress.outTimeUs / this.duration / 10) //us -> ms /1000 - percent -> *100
 					})
 				},
 			}
