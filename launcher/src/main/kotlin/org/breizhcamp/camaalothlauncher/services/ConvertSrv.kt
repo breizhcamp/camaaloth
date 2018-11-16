@@ -1,5 +1,6 @@
 package org.breizhcamp.camaalothlauncher.services
 
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.breizhcamp.camaalothlauncher.dto.FFMpegProgress
@@ -82,7 +83,7 @@ class ConvertSrv(private val talkSrv: TalkSrv, private val msgTpl: SimpMessaging
     /**
      * Compute the length of several video files
      */
-    private fun videoFileLength(files: List<Path>) : Duration = runBlocking {
+    private fun videoFileLength(files: List<Path>) : Duration = runBlocking(IO) {
         val defered = files.map { f ->
             async { filesSrv.fileDuration(f) }
         }
