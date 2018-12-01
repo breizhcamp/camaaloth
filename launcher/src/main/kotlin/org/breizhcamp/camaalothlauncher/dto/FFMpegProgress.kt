@@ -10,7 +10,7 @@ data class FFMpegProgress(
         val fps: BigDecimal?,
         val bitrate: String?, //5030.12kbits/s
         val outTimeUs: Long,
-        val speed: String?, //12.3x
+        val speed: BigDecimal?, //12.3 (= 12.3x)
         val progress: String? //"continue" or "end"
 ) {
 
@@ -25,7 +25,7 @@ data class FFMpegProgress(
                     args.get("fps")?.toBigDecimal(),
                     args.get("bitrate"),
                     args.get("out_time_us")?.toLong() ?: args.get("out_time_ms")?.toLong() ?: throw IllegalStateException("No [out_time_(u|m)s] in msg"),
-                    args.get("speed"),
+                    args.get("speed")?.dropLast(1)?.trim()?.toBigDecimal(),
                     args.get("progress")
             )
         }

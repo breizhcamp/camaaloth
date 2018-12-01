@@ -4,6 +4,7 @@
 <head>
 	<script src="/webjars/axios/0.18.0/dist/axios.min.js"></script>
 	<script src="/webjars/moment/2.22.2/min/moment-with-locales.min.js"></script>
+	<script src="/webjars/vue-moment/4.0.0/dist/vue-moment.min.js"></script>
 	<script src="/webjars/moment-duration-format/2.2.2/lib/moment-duration-format.js"></script>
 	<script src="/webjars/vue/2.5.17/dist/vue.js" ></script>
 	<script src="/static/js/lib.js" th:src="@{/js/lib.js}"></script>
@@ -38,11 +39,20 @@
 
 	<div id="vue">
 		<div class="row mb-3">
-			<div class="col-md-12">
+			<div class="col-md-6">
 				<h4 v-if="ffmpegRunning">Export en cours...</h4>
 				<h4 v-if="!ffmpegRunning && progress < 100">Export en attente...</h4>
 				<h4 v-if="!ffmpegRunning && progress == 100">Export terminé</h4>
+			</div>
+			<div class="col-md-6">
+				<p v-if="remaining && ffmpegRunning" class="text-muted font-italic text-right">
+					Temps restant estimé : {{ remaining | duration().format('h [h] m [min] s [s]') }}
+				</p>
+			</div>
+		</div>
 
+		<div class="row mb-3">
+			<div class="col-md-12">
 				<div class="progress pgbar">
 					<div class="progress-bar" role="progressbar"
 						 v-bind:class="progressBarStyle" v-bind:style="{ width: progress + '%' }" >
@@ -63,13 +73,16 @@
 	</div>
 
 	<script>
+		moment.locale('fr')
+		Vue.use(vueMoment, { moment })
 		new Vue({
 			el: '#vue',
 			data: {
 				log: [],
 				ffmpegRunning: false,
 				progress: 0,
-				duration: 100
+				duration: 100,
+				remaining: null
 			},
 
 			created() {
@@ -121,6 +134,8 @@
 					}).sub('/040-ffmpeg-export-progress', msg => {
 						let progress = JSON.parse(msg.body)
 						this.progress = Math.round(progress.outTimeUs / this.duration / 10) //us -> ms /1000 - percent -> *100
+						let remainMs = (this.duration - progress.outTimeUs / 1000) / progress.speed
+						this.remaining = moment.duration(remainMs)
 					})
 				},
 			}
