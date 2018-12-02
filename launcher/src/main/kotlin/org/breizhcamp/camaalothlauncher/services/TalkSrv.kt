@@ -9,6 +9,8 @@ import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.time.LocalDate
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -60,25 +62,32 @@ class TalkSrv(private val objectMapper: ObjectMapper, private val props: Camaalo
     }
 
     /** Define current talk session after reading zip [zipFile] */
-    fun setCurrentTalkFromFile(zipFile: String): TalkSession? {
+    fun setCurrentTalkFromFile(zipFile: String): TalkSession {
         val t = readTalkSession(zipFile, false)
         currentTalk = t
 
         val dirName = LocalDate.now().toString() + " - " + t.talk + " - " + t.speakers.joinToString(" -") { it.name }
         recordingPath = Paths.get(props.recordingDir, dirName.replace('/', '-'))
 
-        return currentTalk
+        createCurrentTalkDirAndCopyInfos(zipFile)
+        extractImagesToThemeDir(zipFile)
+
+        return t
     }
 
     fun getCurrentTalk(): TalkSession? = currentTalk
 
     /** Create directory for current dir */
-    fun createCurrentTalkDir() {
+    fun createCurrentTalkDirAndCopyInfos(zipFile: String) {
         val preview = previewDir() ?: return
 
         if (Files.notExists(preview)) {
             Files.createDirectories(preview)
         }
+
+        val zip = Paths.get(zipFile)
+        val dest = preview.parent.resolve("infos.ug.zip")
+        Files.copy(zip, dest, REPLACE_EXISTING, COPY_ATTRIBUTES)
     }
 
     /** Extract all png in [zipFile] into themes/images dir */
