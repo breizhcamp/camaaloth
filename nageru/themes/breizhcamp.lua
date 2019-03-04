@@ -16,23 +16,24 @@ local neutral_colors = {
 	{0.5, 0.5, 0.5},  -- Input 1.
 	{0.5, 0.5, 0.5},  -- Input 2.
 	{0.5, 0.5, 0.5},  -- Input 3.	
-	{0.5, 0.5, 0.5}   -- Input 4.	
 }
 
-local NUM_CAMERAS = 4  -- Remember to update neutral_colors, too.
+local NUM_CAMERAS = 3  -- Remember to update neutral_colors, too.
 
 -- Valid values for live_signal_num and preview_signal_num.
 local INPUT0_SIGNAL_NUM = 0  -- Computer
 local INPUT1_SIGNAL_NUM = 1  -- Camera 1
 local INPUT2_SIGNAL_NUM = 2  -- Camera 2
-local INPUT3_SIGNAL_NUM = 3  -- Camera 3
-local SBS_SIGNAL_NUM = 4
-local STATIC_SIGNAL_NUM = 5
+local SBS_SIGNAL_NUM = 3
+local STATIC_SIGNAL_NUM = 4
 
 -- Valid values for transition_type. (Cuts are done directly, so they need no entry.)
 local NO_TRANSITION = 0
-local ZOOM_TRANSITION = 1  -- Also for slides.
+local ZOOM_TRANSITION = 1  -- Also for slides
 local FADE_TRANSITION = 2
+local SLIDE_TRANSITION = 3
+local SLOW_TRANSITION = 4
+local FAST_TRANSITION = 5
 
 -- Current state of the mixing pipeline
 local live_signal_num = STATIC_SIGNAL_NUM
@@ -55,13 +56,6 @@ local four_third = false
 local last_resolution = {}
 
 require('utils')
-local osc = require("osc")
-
-local socket = require("socket")
-udp = assert(socket.udp())
-assert(udp:setsockname("127.0.0.1", 21547))
-assert(udp:settimeout(0))
-
 
 -- Make all possible combinations of side-by-side chains.
 local sbs_chains = make_cartesian_product({
@@ -119,7 +113,7 @@ function get_input_type(signals, signal_num)
 end
 
 function is_plain_signal(num)
-	return num == INPUT0_SIGNAL_NUM or num == INPUT1_SIGNAL_NUM or num == INPUT2_SIGNAL_NUM or num == INPUT3_SIGNAL_NUM
+	return num == INPUT0_SIGNAL_NUM or num == INPUT1_SIGNAL_NUM or num == INPUT2_SIGNAL_NUM
 end
 
 function needs_scale(signals, signal_num, width, height)
@@ -150,8 +144,6 @@ function channel_name(channel)
 		return "Camera 1 " .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
 	elseif signal_num == INPUT2_SIGNAL_NUM then
 		return "Camera 2" .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
-	elseif signal_num == INPUT3_SIGNAL_NUM then
-		return "Camera 3" .. " (" .. get_channel_resolution(last_resolution[signal_num]) .. ")"
 	elseif signal_num == SBS_SIGNAL_NUM then
 		return "Side-by-side"
 	elseif signal_num == STATIC_SIGNAL_NUM then
@@ -293,7 +285,7 @@ end
 -- API ENTRY POINT
 -- Called when the user clicks a transition button.
 function transition_clicked(num, t)
-	if num == 0 then
+	if num == NO_TRANSITION then
 		-- Cut.
 		if in_transition(t) then
 			-- Ongoing transition; finish it immediately before the cut.
@@ -301,7 +293,7 @@ function transition_clicked(num, t)
 		end
 
 		swap_preview_live()
-	elseif num == 1 then
+	elseif num == ZOOM_TRANSITION then
 		-- Zoom.
 		finish_transitions(t)
 
@@ -321,7 +313,7 @@ function transition_clicked(num, t)
 				(preview_signal_num == SBS_SIGNAL_NUM and (live_signal_num == INPUT0_SIGNAL_NUM or live_signal_num == INPUT1_SIGNAL_NUM)) then
 			start_transition(ZOOM_TRANSITION, t, transition_duration)
 		end
-	elseif num == 2 then
+	elseif num == FADE_TRANSITION then
 		finish_transitions(t)
 
 		-- Fade.
@@ -334,6 +326,14 @@ function transition_clicked(num, t)
 		else
 			-- Fades involving SBS are ignored (we have no chain for it).
 		end
+	elseif num == SLIDE_TRANSITION then
+		four_third = not four_third
+	elseif num == SLOW_TRANSITION then
+		transition_duration = 1.5
+		print("Slow transitions")
+	elseif num == FAST_TRANSITION then
+		transition_duration = 0.7
+		print("Fast transitions")
 	end
 end
 
@@ -374,40 +374,6 @@ function get_sbs_chain(signals, t, width, height, input_resolution)
 	return sbs_chains[input0_type][input1_type][true]
 end
 
-function read_osc_msg(t)
-	local dgram, ip, port = udp:receivefrom()
-	if not dgram then
-		return
-	end
-
-    local message = osc.decode_message(dgram)
-
-	-- Mapping for Akai MPD218
-	if #message == 6 then
-		local button = message[4]
-		local value = message[6]
-		if button >= 48 and button <= 51 and not (value == 0) then
-			print ("change cam")
-			local channel = message[4]-48
-			if channel < NUM_CAMERAS then
-				channel_clicked(channel)
-			end
-		end
-		if button >= 44 and button <= 47 and not (value == 0) then
-			local channel = button - 44
-			if channel <= 1 then
-				channel_clicked(channel + NUM_CAMERAS)
-			end
-		end
-		if button >= 40 and button < 43 and not (value == 0)  then
-			transition_clicked(button - 40, t)
-		end
-		if button == 43 and not (value == 0) then
-			four_third = not four_third 
-		end
-	end
-end
-
 -- API ENTRY POINT
 -- Called every frame. Get the chain for displaying at input <num>,
 -- where 0 is live, 1 is preview, 2 is the first channel to display
@@ -433,8 +399,6 @@ end
 -- NOTE: The chain returned must be finalized with the Y'CbCr flag
 -- if and only if num==0.
 function get_chain(num, t, width, height, signals)
-	read_osc_msg(t)
-
 	local input_resolution = {}
 	for signal_num=0,(NUM_CAMERAS -1) do
 		local res = {
@@ -542,15 +506,17 @@ function prepare_sbs_chain(chain, t, transition_type, src_signal, dst_signal, sc
 	-- Second input is speaker vignette
 	local pos0,pos0_end,pos1,pos1_end
 	if four_third then
-		pos0 = pos_from_top_left(486, 720 - 685, 773, 580, screen_width, screen_height)
-		pos0_end = translate(pos0, screen_width - 486 + 20, 0)
+		pos0_left = 486
+		pos0 = pos_from_top_left(pos0_left, 720 - 685, 773, 580, screen_width, screen_height)
+		pos0_end = translate(pos0, screen_width - pos0_left + 20, 0)
 		pos1 = pos_from_top_left(20, 720 - 685, 440, 447, screen_width, screen_height)
 		pos1_end = translate(pos1, -(440+20+20), 0)
 	else
-		pos0 = pos_from_top_left(286, 720 - 651, 973, 547, screen_width, screen_height)
-		pos0_end = translate(pos0, screen_width - 286 - 20, 0)
-		pos1 = pos_from_top_left(20, 720 - 651, 247, 413, screen_width, screen_height)
-		pos1_end = translate(pos1, -(247+20+20), 0)
+		pos0_left = 306
+		pos0 = pos_from_top_left(pos0_left, 720 - 651, 973, 547, screen_width, screen_height)
+		pos0_end = translate(pos0, screen_width - pos0_left - 20, 0)
+		pos1 = pos_from_top_left(0, 720 - 651, 287, 413, screen_width, screen_height)
+		pos1_end = translate(pos1, -(287+20+20), 0)
 	end
 
 	local pos_fs = { x0 = 0, y0 = 0, x1 = screen_width, y1 = screen_height }

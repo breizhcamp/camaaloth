@@ -1,0 +1,58 @@
+num_controller_banks: 0
+bus_mapping {
+  video_channel {
+    note_number: 52
+  }
+  video_transition {
+    note_number: 60
+  }
+  next_audio_view {
+    note_number: 51
+  }
+  begin_new_video_segment {
+    note_number: 48
+  }
+  exit {
+    note_number: 49
+  }
+}
+bus_mapping {
+  video_channel {
+    note_number: 53
+  }
+  video_transition {
+    note_number: 61
+  }
+  next_audio_view {
+    note_number: 67
+  }
+}
+bus_mapping {
+  video_channel {
+    note_number: 54
+  }
+  video_transition {
+    note_number: 62
+  }
+}
+bus_mapping {
+  video_channel {
+    note_number: 55
+  }
+  video_transition {
+    note_number: 57
+  }
+}
+bus_mapping {
+  video_channel {
+    note_number: 56
+  }
+  video_transition {
+    note_number: 58
+  }
+}
+bus_mapping {
+  video_transition {
+    note_number: 59
+  }
+}
