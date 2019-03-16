@@ -2,7 +2,7 @@ camaaloth:
   recordingDir: "${HOME}/Videos"
   copyScript: "${HOME}/camaaloth/nageru/copy.sh"
   nageru:
-    startScript: "${HOME}/camaaloth/nageru/launch-capture2.sh"
+    startScript: "${HOME}/camaaloth/nageru/launch-nageru.sh"
     themeDir: "${HOME}/camaaloth/nageru/themes"
   breizhcamp:
     arduinoPort: no
