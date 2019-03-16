@@ -1,6 +1,8 @@
 camaaloth:
   recordingDir: "${HOME}/Videos"
   copyScript: "${HOME}/camaaloth/nageru/copy.sh"
+  preRecordScript: "${HOME}/tv-display/local/stop.sh"
+  postRecordScript: "${HOME}/tv-display/local/start.sh"
   nageru:
     startScript: "${HOME}/camaaloth/nageru/launch-nageru.sh"
     themeDir: "${HOME}/camaaloth/nageru/themes"
