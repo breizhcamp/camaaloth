@@ -1,0 +1,32 @@
+device {
+  type: ALSA_INPUT
+  index: 2
+  display_name: "Scarlett 18i20 USB (USB Audio)"
+  alsa_name: "Scarlett 18i20 USB"
+  alsa_info: "USB Audio"
+  num_channels: 18
+  address: "hw:1,0"
+}
+device {
+  type: CAPTURE_CARD
+  index: 1
+  display_name: "PCI card 1: DeckLink Duo 2 (subdevice 1)"
+}
+bus {
+  name: "Serre tete (7)"
+  device_index: 0
+  source_channel_left: 6
+  source_channel_right: 6
+}
+bus {
+  name: "Main (8)"
+  device_index: 0
+  source_channel_left: 7
+  source_channel_right: 7
+}
+bus {
+  name: "PC"
+  device_index: 1
+  source_channel_left: 0
+  source_channel_right: 1
+}

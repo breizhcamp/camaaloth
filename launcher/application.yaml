@@ -1,0 +1,16 @@
+camaaloth:
+  recordingDir: "${HOME}/Videos"
+  copyScript: "${HOME}/camaaloth/nageru/copy.sh"
+  nageru:
+    startScript: "${HOME}/camaaloth/nageru/launch-capture2.sh"
+    themeDir: "${HOME}/camaaloth/nageru/themes"
+  breizhcamp:
+    arduinoPort: no
+    room: "Amphi C"
+    scheduleFiles:
+      - "${HOME}/camaaloth/launcher/schedule.json"
+      - "${HOME}/camaaloth/launcher/talks_others.json"
+    copyDir: "videos"
+    copyServer: "rsync://192.168.1.2/"
+
+

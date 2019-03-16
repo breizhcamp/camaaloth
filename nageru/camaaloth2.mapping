@@ -1,0 +1,26 @@
+device {
+  type: ALSA_INPUT
+  index: 0
+  display_name: "Scarlett 2i2 USB (USB Audio)"
+  alsa_name: "Scarlett 2i2 USB"
+  alsa_info: "USB Audio"
+  num_channels: 2
+  address: "hw:2,0"
+}
+device {
+  type: CAPTURE_CARD
+  index: 0
+  display_name: "PCI card 0: DeckLink Duo 2 (subdevice 0)"
+}
+bus {
+  name: "Table mix"
+  device_index: 0
+  source_channel_left: 0
+  source_channel_right: 1
+}
+bus {
+  name: "PC"
+  device_index: 1
+  source_channel_left: 0
+  source_channel_right: 1
+}

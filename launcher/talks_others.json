@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Keynote d'ouverture",
+    "event_start": "2019-03-21T09:00:00Z",
+    "event_end": "2019-03-21T10:00:00Z",
+    "event_key": "tobedefined",
+    "event_type": "Keynote",
+    "format": "Keynote",
+    "venue": "Amphi C",
+    "speakers": "Équipe BreizhCamp, Stéphane Bortzmeyer",
+    "video_url": null,
+    "files_url": null,
+    "slides_url": null,
+    "description": "Internet et droits humains, il y a vraiment un rapport ?"
+  },
+  {
+    "name": "Keynote de clôture",
+    "event_start": "2019-03-21T18:05:00Z",
+    "event_end": "2019-03-21T18:30:00Z",
+    "event_key": "tobedefined",
+    "event_type": "Keynote",
+    "format": "Keynote",
+    "venue": "Amphi C",
+    "speakers": "Équipe BreizhCamp, ...surprise",
+    "video_url": null,
+    "files_url": null,
+    "slides_url": null,
+    "description": "Keynote de clôture"
+  },
+  {
+    "name": "Keynote d'ouverture",
+    "event_start": "2019-03-22T09:00:00Z",
+    "event_end": "2019-03-22T10:00:00Z",
+    "event_key": "tobedefined",
+    "event_type": "Keynote",
+    "format": "Keynote",
+    "venue": "Amphi C",
+    "speakers": "Équipe BreizhCamp, Rayna Stamboliyska",
+    "video_url": null,
+    "files_url": null,
+    "slides_url": null,
+    "description": "La menace fantôme"
+  },
+  {
+    "name": "Keynote de clôture",
+    "event_start": "2019-03-22T17:30:00Z",
+    "event_end": "2019-03-22T18:00:00Z",
+    "event_key": "tobedefined",
+    "event_type": "Keynote",
+    "format": "Keynote",
+    "venue": "Amphi C",
+    "speakers": "Équipe BreizhCamp, ...surprise",
+    "video_url": null,
+    "files_url": null,
+    "slides_url": null,
+    "description": "Keynote de clôture"
+  }
+]

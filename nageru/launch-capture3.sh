@@ -7,6 +7,5 @@ cd "$HERE/themes"
 nageru $COMMON_ARGS \
   -c 4 \
   --output-card 3 \
-  --flat-audio \
-  --input-mapping="$HERE/camaaloth2.mapping" \
+  --input-mapping="$HERE/camaaloth3.mapping" \
   "$@"
