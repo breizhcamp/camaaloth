@@ -17,7 +17,7 @@ fi
 camaaloth_id="${HOSTNAME}"
 
 cd "${HERE}/themes" || exit
-nageru \
+exec nageru \
   -I. -tbreizhcamp.lua \
   --midi-mapping="${HERE}/mappings/akai.midimapping" \
   --input-mapping="${HERE}/mappings/${camaaloth_id}.mapping" \
