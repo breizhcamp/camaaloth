@@ -7,8 +7,7 @@ camaaloth:
     startScript: "${HOME}/camaaloth/nageru/launch-nageru.sh"
     themeDir: "${HOME}/camaaloth/nageru/themes"
   breizhcamp:
-    arduinoPort: no
-    room: "Amphi C"
+    arduinoPort: auto
     scheduleFiles:
       - "${HOME}/camaaloth/launcher/schedule.json"
       - "${HOME}/camaaloth/launcher/talks_others.json"
