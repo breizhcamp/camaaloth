@@ -44,7 +44,7 @@ local transition_end = -1.0
 local transition_type = 0
 local transition_src_signal = 0
 local transition_dst_signal = 0
-local transition_duration = 0.7
+local transition_duration = 0.5
 
 
 -- Are slides in 4/3 for SBS?
@@ -332,7 +332,7 @@ function transition_clicked(num, t)
 		transition_duration = 1.5
 		print("Slow transitions")
 	elseif num == FAST_TRANSITION then
-		transition_duration = 0.7
+		transition_duration = 0.5
 		print("Fast transitions")
 	end
 end
