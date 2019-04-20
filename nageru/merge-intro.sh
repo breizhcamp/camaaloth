@@ -1,11 +1,12 @@
-#!/bin/bash
+#!/bin/bash -x
 
 for i in "$@";  do
     pushd "$i"
     if [[ ! -r intro.ts ]]; then
-    ffmpeg -y -i ../intro-empty.ts -loop 1 -t 6 -i intro.png \
-        -filter_complex "[1:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v0];[v0]scale=-2:720[v1];[0:v][v1]overlay" \
-        -acodec copy -c:v libx264 -preset veryslow -crf 6 \
+    ffmpeg -y -i ../intro-empty.ts -loop 1 -t 19.98 -i intro.png \
+        -filter_complex "[1:v]fade=t=in:st=4:d=1,fade=t=out:st=14:d=1[v0];[v0]scale=-2:720[v1];[0:v][v1]overlay" \
+        -af "volume=-12dB" \
+        -acodec aac -c:v libx264 -preset veryslow -crf 6 \
         intro.ts
     fi
 
@@ -17,6 +18,7 @@ for i in "$@";  do
     if [[ ! valid_ts ]]; then
         echo "Invalid timestamp in start_time file"
     fi 
+    audio_delay="$(cat audio_delay)"
     if [[ ! -r video.ts && valid_ts ]]; then
         seek_arg="00:00:00"
         seek_ts="00.000"
@@ -39,7 +41,8 @@ for i in "$@";  do
         seek_sec="${seek_ts%.*}"
         seek_arg="$(($seek_sec / 3600)):$(($seek_sec / 60)):$(($seek_sec % 60)).${seek_ts#*.}"
         echo $seek_arg
-        ffmpeg -y -i "$source" -ss "$seek_arg" -ab 192k -af "afade=t=in:st=$start_time_in_sec:d=3" -acodec aac -vcodec copy video.ts
+        #ffmpeg -y -ss "$seek_arg" -i "$source" -ab 192k -af "afade=t=in:st=$start_time_in_sec:d=3,adelay=$audio_delay|$audio_delay" -acodec aac -vcodec copy video.ts
+        ffmpeg -y -i "$source" -ab 192k -af "afade=t=in:st=$start_time_in_sec:d=3,adelay=$audio_delay|$audio_delay" -acodec aac -vcodec copy video.ts
     fi
     fi
 
